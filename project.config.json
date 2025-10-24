@@ -1,0 +1,23 @@
+{
+  "miniprogramRoot": "./dist",
+  "projectname": "small ledger",
+  "description": "家有小账本",
+  "appid": "wx8748553a65c9a0b4",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "compileHotReLoad": false,
+    "postcss": false,
+    "minified": true,
+    "enhance": true,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "newFeature": true,
+    "coverView": true,
+    "useCompilerPlugins": [
+      "typescript",
+      "sass"
+    ]
+  },
+  "compileType": "miniprogram"
+}

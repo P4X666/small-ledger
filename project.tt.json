@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "./",
+  "projectname": "small",
+  "description": "家有小账本",
+  "appid": "touristappid",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram"
+}
