@@ -1,0 +1,192 @@
+/*
+ * 目标编辑页面样式
+ * =====================================
+ * 说明：
+ * 1. 所有尺寸均已翻倍以适应大屏幕显示
+ * 2. 样式结构：header(头部) + content(内容区) + footer(底部按钮)
+ * 3. 表单元素包含：普通输入框、金额输入框、周期选择器、多行文本框
+ * 4. 底部按钮：删除按钮 + 取消按钮 + 确认按钮（三按钮布局）
+ * 5. 删除按钮使用红色突出显示危险操作
+ *
+ * 使用方法：
+ * 1. 复制此文件到新页面目录
+ * 2. 根据需要修改颜色变量和尺寸
+ * 3. 如需移除删除功能，调整footer中的flex布局
+ * 4. 保持结构一致性以确保良好的用户体验
+ */
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.back-btn {
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 600;
+  color: #333;
+}
+
+.placeholder {
+  width: 80px;
+}
+
+.content {
+  flex: 1;
+  padding: 40px;
+  background-color: #fff;
+  margin-top: 24px;
+}
+
+.form-field {
+  margin-bottom: 48px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 24px;
+  font-size: 32px;
+  color: #666;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  height: 96px;
+  border: 2px solid #e8e8e8;
+  border-radius: 24px;
+  padding: 0 32px;
+  font-size: 32px;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.amount-input-container {
+  display: flex;
+  align-items: center;
+  border: 2px solid #e8e8e8;
+  border-radius: 24px;
+  padding: 0 32px;
+  background-color: #fafafa;
+}
+
+.currency-symbol {
+  font-size: 40px;
+  font-weight: 500;
+  color: #333;
+  margin-right: 16px;
+}
+
+.amount-input {
+  flex: 1;
+  height: 96px;
+  font-size: 40px;
+  color: #333;
+}
+
+.period-picker {
+  height: 96px;
+  border: 2px solid #e8e8e8;
+  border-radius: 24px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  background-color: #fafafa;
+}
+
+.picker-text {
+  margin-left: 16px;
+  color: #333;
+  font-size: 32px;
+}
+
+.textarea {
+  width: 100%;
+  height: 200px;
+  border: 2px solid #e8e8e8;
+  border-radius: 24px;
+  padding: 24px 32px;
+  font-size: 32px;
+  color: #333;
+  box-sizing: border-box;
+  resize: none;
+}
+
+.footer {
+  padding: 32px;
+  background-color: #fff;
+  border-top: 2px solid #f0f0f0;
+  display: flex;
+  gap: 24px;
+}
+
+.delete-btn {
+  flex: 1;
+  height: 88px;
+  border-radius: 44px;
+  background-color: #f5222d;
+  border: none;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.cancel-btn {
+  flex: 1;
+  height: 88px;
+  border-radius: 44px;
+  background-color: #f5f5f5;
+  border: none;
+  color: #666;
+  font-size: 32px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirm-btn {
+  flex: 1;
+  height: 88px;
+  border-radius: 44px;
+  background-color: #667eea;
+  border: none;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirm-btn:disabled {
+  background-color: #ccc;
+  opacity: 0.6;
+}

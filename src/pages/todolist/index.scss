@@ -1,0 +1,398 @@
+.container {
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.header {
+  margin-bottom: 40px;
+
+  .title {
+    font-size: 48px;
+    font-weight: bold;
+  }
+}
+
+.view-switcher {
+  display: flex;
+  background: #f8f8f8;
+  border-radius: 16px;
+  margin-bottom: 30px;
+  padding: 8px;
+
+  .switch-btn {
+    flex: 1;
+    text-align: center;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 28px;
+    transition: all 0.3s;
+
+    &.active {
+      background: #07c160;
+      color: white;
+    }
+  }
+}
+
+.period-tabs {
+  display: flex;
+  margin-bottom: 40px;
+  background: #f8f8f8;
+  border-radius: 16px;
+  padding: 10px;
+
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 16px 0;
+    border-radius: 12px;
+    transition: all 0.3s;
+
+    &.active {
+      background: #07c160;
+      color: white;
+    }
+  }
+}
+
+.create-task {
+  margin-bottom: 40px;
+
+  .input {
+    width: 100%;
+    height: 80px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    font-size: 28px;
+  }
+
+  .task-options {
+    display: flex;
+    align-items: center;
+
+    .period-picker {
+      flex: 1;
+      height: 72px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+      background: #fff;
+      font-size: 28px;
+    }
+
+    .priority-options {
+      display: flex;
+      margin-right: 20px;
+
+      .priority-checkbox {
+        margin: 0 8px;
+      }
+    }
+
+    .add-btn {
+      height: 72px;
+      background-color: #07c160;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0 30px;
+      font-size: 28px;
+    }
+  }
+}
+
+/* 四象限视图样式 */
+.quadrant-container {
+  .quadrant-title {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .quadrant-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 20px;
+    height: 60vh;
+  }
+
+  .quadrant {
+    border: 2px solid #eee;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+
+    &.quadrant-1 {
+      background-color: #fff1f0;
+      border-color: #ffccc7;
+    }
+
+    &.quadrant-2 {
+      background-color: #f6ffed;
+      border-color: #b7eb8f;
+    }
+
+    &.quadrant-3 {
+      background-color: #fff7e6;
+      border-color: #ffd591;
+    }
+
+    &.quadrant-4 {
+      background-color: #f0f9ff;
+      border-color: #91d5ff;
+    }
+
+    .quadrant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .quadrant-title {
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .task-count {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-size: 24px;
+      }
+    }
+
+    .quadrant-content {
+      flex: 1;
+      overflow-y: auto;
+
+      .quadrant-task {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 12px;
+        margin-bottom: 12px;
+
+        .task-text {
+          flex: 1;
+          font-size: 28px;
+          margin-left: 16px;
+        }
+
+        .task-text.completed {
+          text-decoration: line-through;
+          color: #999;
+        }
+      }
+    }
+  }
+}
+
+/* 编辑弹窗中的优先级选项样式 */
+.priority-checkboxes {
+  display: flex;
+
+  .priority-checkbox {
+    margin: 0 20px 0 0;
+  }
+}
+
+.task-list {
+  .empty-state {
+    text-align: center;
+    color: #999;
+    padding: 80px 0;
+    font-size: 28px;
+  }
+
+  .task-item {
+    background: #fff;
+    padding: 30px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+    .task-content {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .checkbox {
+        margin-right: 20px;
+      }
+
+      .task-title {
+        flex: 1;
+        font-size: 32px;
+      }
+
+      .task-title.completed {
+        text-decoration: line-through;
+        color: #999;
+      }
+
+      .task-meta {
+        display: flex;
+        align-items: center;
+
+        .period-tag {
+          font-size: 24px;
+          padding: 4px 16px;
+          border-radius: 20px;
+          margin-left: 20px;
+
+          &.period-week {
+            background: #e6f7ff;
+            color: #1890ff;
+          }
+
+          &.period-month {
+            background: #f6ffed;
+            color: #52c41a;
+          }
+
+          &.period-year {
+            background: #fff7e6;
+            color: #fa8c16;
+          }
+
+          &.period-none {
+            background: #f5f5f5;
+            color: #999;
+          }
+        }
+
+        .priority-tags {
+          display: flex;
+          margin-left: 20px;
+
+          .important-tag {
+            font-size: 24px;
+            padding: 4px 12px;
+            background: #fff2e8;
+            color: #fa8c16;
+            border-radius: 20px;
+            margin-right: 8px;
+          }
+
+          .urgent-tag {
+            font-size: 24px;
+            padding: 4px 12px;
+            background: #fff1f0;
+            color: #f5222d;
+            border-radius: 20px;
+          }
+        }
+      }
+    }
+
+    .task-actions {
+      display: flex;
+      justify-content: flex-end;
+
+      .edit-btn {
+        margin-right: 20px;
+        color: #1989fa;
+        background: none;
+        border: none;
+        font-size: 28px;
+      }
+
+      .delete-btn {
+        color: #ee0a24;
+        background: none;
+        border: none;
+        font-size: 28px;
+      }
+    }
+  }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    width: 80%;
+
+    .modal-title {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      display: block;
+    }
+
+    .input {
+      width: 100%;
+      height: 80px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 0 20px;
+      margin-bottom: 40px;
+      box-sizing: border-box;
+      font-size: 28px;
+    }
+
+    .modal-field {
+      margin-bottom: 40px;
+
+      .field-label {
+        display: block;
+        margin-bottom: 16px;
+        font-size: 28px;
+        color: #666;
+      }
+
+      .modal-picker {
+        height: 80px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 0 20px;
+        font-size: 28px;
+      }
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+
+      .save-btn {
+        margin-right: 20px;
+        background-color: #07c160;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 16px 40px;
+        font-size: 28px;
+      }
+
+      .cancel-btn {
+        background-color: #f2f3f5;
+        color: #333;
+        border: none;
+        border-radius: 8px;
+        padding: 16px 40px;
+        font-size: 28px;
+      }
+    }
+  }
+}

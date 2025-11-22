@@ -6,8 +6,6 @@ import prodConfig from './prod'
 import path from 'node:path';
 import NutUIResolver from '@nutui/auto-import-resolver'
 
-// import Components from 'unplugin-vue-components/vite'
-
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
 export default defineConfig(async (merge, { command, mode }) => {
   const baseConfig: UserConfigExport = {
@@ -32,6 +30,10 @@ export default defineConfig(async (merge, { command, mode }) => {
     sourceRoot: 'src',
     outputRoot: 'dist',
     plugins: ['@tarojs/plugin-html'],
+    // 配置全局 Scss 变量
+    sass: {
+      data: `@import "@nutui/nutui-taro/dist/styles/variables.scss";`,
+    },
     defineConstants: {
     },
     copy: {
@@ -62,6 +64,10 @@ export default defineConfig(async (merge, { command, mode }) => {
         }));
       },
       postcss: {
+        autoprefixer: {
+          enable: false, // 禁用自动前缀生成
+          config: {}
+        },
         pxtransform: {
           enable: true,
           config: {
