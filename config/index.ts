@@ -38,6 +38,10 @@ export default defineConfig(async (merge, { command, mode }) => {
     },
     copy: {
       patterns: [
+        {
+          from: 'src/assets/images',
+          to: 'dist/assets/images'
+        }
       ],
       options: {
       }

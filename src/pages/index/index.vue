@@ -1,66 +1,106 @@
 <template>
   <view class="index-page">
-    <!-- 欢迎卡片 -->
-    <view class="welcome-card">
-      <view class="welcome-header">
-        <view>
-          <text class="welcome-title">欢迎回来！</text>
-          <text class="welcome-subtitle">{{ greetingMessage }}</text>
+    <!-- 头部问候语 -->
+    <view class="header">
+      <text class="greeting">{{ greetingMessage }}</text>
+      <text class="date">{{ formatDate }}</text>
+    </view>
+    
+    <!-- 新建任务按钮 -->
+    <view class="add-task-section">
+      <button class="add-task-btn" @click="navigateTo('/pages/todolist/index?action=add')">
+        <text class="add-icon">+</text>
+        <text class="add-text">新建任务</text>
+      </button>
+    </view>
+    
+    <!-- 未完成任务展示 -->
+    <view class="pending-tasks-section">
+      <view class="section-header">
+        <text class="section-title">重要任务</text>
+        <text class="view-all" @click="navigateTo('/pages/todolist/index')">查看全部</text>
+      </view>
+      
+      <view class="tasks-list" v-if="importantPendingTasks && importantPendingTasks.length > 0">
+        <view class="task-item" v-for="task in displayTasks" :key="task?.id || Math.random()">
+          <view class="task-checkbox" @click="toggleTaskStatus(task.id)">
+            <view class="checkbox" :class="{ checked: task.completed }">
+              <text v-if="task.completed" class="check-icon">✓</text>
+            </view>
+          </view>
+          <view class="task-content">
+            <text class="task-title">{{ task.title || '未命名任务' }}</text>
+            <text v-if="task.priority?.important && task.priority?.urgent" class="priority-badge important-urgent">重要紧急</text>
+            <text v-else-if="task.priority?.important" class="priority-badge important">重要</text>
+            <text v-else-if="task.priority?.urgent" class="priority-badge urgent">紧急</text>
+          </view>
+          <view class="task-arrow" @click="navigateTo(`/pages/todolist/index?action=edit&id=${task.id}`)">
+            <text>›</text>
+          </view>
         </view>
-        <!-- <nut-avatar shape="square" size="48" bg-color="#07c160" text="用户" /> -->
+        
+        <!-- 显示更多任务 -->
+        <view v-if="importantPendingTasks.length > 5" class="show-more">
+          <text class="show-more-text" @click="showAllTasks = !showAllTasks">
+            {{ showAllTasks ? '收起' : `还有 ${importantPendingTasks.length - 5} 个任务` }}
+          </text>
+        </view>
+      </view>
+      
+      <view v-else class="no-tasks">
+        <text>暂无重要任务，点击上方按钮创建新任务吧</text>
       </view>
     </view>
-
+    
+    <!-- 任务统计概览 -->
+    <view class="task-stats">
+      <view class="stat-box">
+        <text class="stat-number">{{ importantPendingTasks.filter(task => !task.completed).length }}</text>
+        <text class="stat-label">待完成任务</text>
+      </view>
+      <view class="stat-box">
+        <text class="stat-number">{{ firstQuadrantTasksCount }}</text>
+        <text class="stat-label">重要紧急任务</text>
+      </view>
+    </view>
+    
     <!-- 快捷入口 -->
     <view class="quick-actions">
-      <view class="action-item" @click="navigateTo('/pages/todolist/index')">
-        <view class="action-icon blue">
-          <nut-icon name="task-list" size="24" color="#fff" />
+      <view class="quick-action" @click="navigateTo('/pages/todolist/index')">
+        <view class="quick-action-icon task">
+          <text class="icon-text">任务</text>
         </view>
         <text class="action-text">任务管理</text>
       </view>
-      <view class="action-item" @click="navigateTo('/pages/accounting/index')">
-        <view class="action-icon green">
-          <nut-icon name="account-book" size="24" color="#fff" />
+      
+      <view class="quick-action" @click="navigateTo('/pages/account/index')">
+        <view class="quick-action-icon account">
+          <text class="icon-text">记账</text>
         </view>
-        <text class="action-text">记账</text>
+        <text class="action-text">日常记账</text>
       </view>
-      <view class="action-item" @click="navigateTo('/pages/goals/index')">
-        <view class="action-icon orange">
-          <nut-icon name="target" size="24" color="#fff" />
+      
+      <view class="quick-action" @click="navigateTo('/pages/goal/index')">
+        <view class="quick-action-icon goal">
+          <text class="icon-text">目标</text>
         </view>
-        <text class="action-text">目标</text>
-      </view>
-    </view>
-
-    <!-- 今日概览 -->
-    <view class="today-overview">
-      <view class="section-header">
-        <text class="section-title">今日概览</text>
-      </view>
-      <view class="overview-stats">
-        <view class="stat-item">
-          <text class="stat-value">{{ todayTasks }}</text>
-          <text class="stat-label">待办任务</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-value">¥{{ todayIncome }}</text>
-          <text class="stat-label">今日收入</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-value">¥{{ todayExpense }}</text>
-          <text class="stat-label">今日支出</text>
-        </view>
+        <text class="action-text">目标管理</text>
       </view>
     </view>
+    
+    <!-- 自定义底部栏 -->
+    <CustomTabBar />
   </view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import Taro from '@tarojs/taro';
-import { useCounterStore } from '@/store/counter';
+import CustomTabBar from '../../components/CustomTabBar/index.vue';
 import './index.scss'
+
+// 状态管理
+const showAllTasks = ref(false);
 
 // 获取问候语
 const greetingMessage = computed(() => {
@@ -74,27 +114,102 @@ const greetingMessage = computed(() => {
   return '夜深了，准备休息';
 });
 
-// 最近活动数据
-const recentActivities = ref([
+// 格式化日期
+const formatDate = computed(() => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}年${month}月${day}日`;
+});
+
+// 模拟重要待办任务数据
+const importantPendingTasks = ref([
   {
-    type: 'task',
-    icon: 'task-add',
-    text: '创建了新任务：完成项目规划',
-    time: '10分钟前'
+    id: '1',
+    title: '完成项目规划报告',
+    priority: { important: true, urgent: true },
+    completed: false
   },
   {
-    type: 'account',
-    icon: 'account-book',
-    text: '记录了一笔收入：工资入账',
-    time: '今天 10:30'
+    id: '2',
+    title: '准备团队会议演示文稿',
+    priority: { important: true, urgent: false },
+    completed: false
   },
   {
-    type: 'goal',
-    icon: 'target',
-    text: '更新了目标：本月储蓄计划',
-    time: '昨天 18:45'
+    id: '3',
+    title: '回复重要客户邮件',
+    priority: { important: false, urgent: true },
+    completed: false
+  },
+  {
+    id: '4',
+    title: '整理月度工作报告',
+    priority: { important: true, urgent: true },
+    completed: false
+  },
+  {
+    id: '5',
+    title: '与设计团队讨论界面原型',
+    priority: { important: true, urgent: false },
+    completed: false
+  },
+  {
+    id: '6',
+    title: '更新项目进度表',
+    priority: { important: true, urgent: true },
+    completed: false
   }
 ]);
+
+// 显示的任务数量
+// 增强displayTasks计算属性，添加防御性检查
+const displayTasks = computed(() => {
+  if (!importantPendingTasks.value || !Array.isArray(importantPendingTasks.value)) {
+    return [];
+  }
+  
+  if (showAllTasks.value) {
+    return importantPendingTasks.value;
+  }
+  return importantPendingTasks.value.slice(0, 5);
+});
+
+// 增强firstQuadrantTasksCount计算属性，添加防御性检查
+const firstQuadrantTasksCount = computed(() => {
+  if (!importantPendingTasks.value || !Array.isArray(importantPendingTasks.value)) {
+    return 0;
+  }
+  
+  return importantPendingTasks.value.filter(task => 
+    task && task.priority?.important && task.priority?.urgent && !task.completed
+  ).length;
+});
+
+// 增强toggleTaskStatus函数，添加参数检查
+const toggleTaskStatus = (taskId) => {
+  if (!taskId) {
+    console.error('任务ID不能为空');
+    return;
+  }
+  
+  if (!importantPendingTasks.value || !Array.isArray(importantPendingTasks.value)) {
+    console.error('任务列表未初始化');
+    return;
+  }
+  
+  const task = importantPendingTasks.value.find(t => t.id === taskId);
+  if (task) {
+    task.completed = !task.completed;
+    Taro.showToast({
+      title: task.completed ? '任务已完成' : '任务已恢复',
+      icon: 'none'
+    });
+  } else {
+    console.error('未找到指定任务');
+  }
+};
 
 // 今日概览数据
 const todayTasks = ref(5);
@@ -102,18 +217,22 @@ const todayIncome = ref('1000.00');
 const todayExpense = ref('235.50');
 
 // 导航到指定页面
+// 增强navigateTo函数，添加参数检查
 const navigateTo = (url) => {
+  if (!url) {
+    console.error('导航URL不能为空');
+    return;
+  }
+  
   Taro.navigateTo({
-    url
-  });
-};
-
-// 查看全部活动
-const viewAllActivities = () => {
-  // 这里可以导航到活动历史页面
-  Taro.showToast({
-    title: '功能开发中',
-    icon: 'none'
+    url,
+    fail: (err) => {
+      console.error('导航失败:', err);
+      Taro.showToast({
+        title: '页面跳转失败',
+        icon: 'error'
+      });
+    }
   });
 };
 

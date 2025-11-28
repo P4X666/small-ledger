@@ -1,6 +1,9 @@
 .container {
   padding: 40px;
+  padding-bottom: 120px; /* 为底部栏留出空间 */
   box-sizing: border-box;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
 }
 
 .header {
@@ -14,7 +17,7 @@
 
 .view-switcher {
   display: flex;
-  background: #f8f8f8;
+  background: var(--bg-gray);
   border-radius: 16px;
   margin-bottom: 30px;
   padding: 8px;
@@ -28,16 +31,16 @@
     transition: all 0.3s;
 
     &.active {
-      background: #07c160;
-      color: white;
-    }
+        background: var(--primary-color);
+        color: var(--text-white);
+      }
   }
 }
 
 .period-tabs {
   display: flex;
   margin-bottom: 40px;
-  background: #f8f8f8;
+  background: var(--bg-gray);
   border-radius: 16px;
   padding: 10px;
 
@@ -49,9 +52,9 @@
     transition: all 0.3s;
 
     &.active {
-      background: #07c160;
-      color: white;
-    }
+        background: var(--primary-color);
+        color: var(--text-white);
+      }
   }
 }
 
@@ -61,7 +64,7 @@
   .input {
     width: 100%;
     height: 80px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border-primary);
     border-radius: 8px;
     padding: 0 20px;
     margin-bottom: 20px;
@@ -76,13 +79,13 @@
     .period-picker {
       flex: 1;
       height: 72px;
-      border: 2px solid #ddd;
+      border: 2px solid var(--border-primary);
       border-radius: 8px;
       padding: 0 20px;
       display: flex;
       align-items: center;
       margin-right: 20px;
-      background: #fff;
+      background: var(--bg-primary);
       font-size: 28px;
     }
 
@@ -97,8 +100,8 @@
 
     .add-btn {
       height: 72px;
-      background-color: #07c160;
-      color: white;
+      background-color: var(--primary-color);
+      color: var(--text-white);
       border: none;
       border-radius: 8px;
       padding: 0 30px;
@@ -125,30 +128,30 @@
   }
 
   .quadrant {
-    border: 2px solid #eee;
+    border: 2px solid var(--border-light);
     border-radius: 16px;
     padding: 20px;
     display: flex;
     flex-direction: column;
 
     &.quadrant-1 {
-      background-color: #fff1f0;
-      border-color: #ffccc7;
+      background-color: var(--bg-error-light);
+      border-color: var(--border-error-light);
     }
 
     &.quadrant-2 {
-      background-color: #f6ffed;
-      border-color: #b7eb8f;
+      background-color: var(--bg-success-light);
+      border-color: var(--border-success-light);
     }
 
     &.quadrant-3 {
-      background-color: #fff7e6;
-      border-color: #ffd591;
+      background-color: var(--bg-warning-light);
+      border-color: var(--border-warning-light);
     }
 
     &.quadrant-4 {
-      background-color: #f0f9ff;
-      border-color: #91d5ff;
+      background-color: var(--bg-info-light);
+      border-color: var(--border-info-light);
     }
 
     .quadrant-header {
@@ -190,7 +193,7 @@
 
         .task-text.completed {
           text-decoration: line-through;
-          color: #999;
+          color: var(--text-tertiary);
         }
       }
     }
@@ -209,17 +212,17 @@
 .task-list {
   .empty-state {
     text-align: center;
-    color: #999;
+    color: var(--text-tertiary);
     padding: 80px 0;
     font-size: 28px;
   }
 
   .task-item {
-    background: #fff;
+    background: var(--bg-primary);
     padding: 30px;
     margin-bottom: 20px;
     border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px var(--shadow-dark);
 
     .task-content {
       display: flex;
@@ -237,7 +240,7 @@
 
       .task-title.completed {
         text-decoration: line-through;
-        color: #999;
+        color: var(--text-tertiary);
       }
 
       .task-meta {
@@ -251,23 +254,23 @@
           margin-left: 20px;
 
           &.period-week {
-            background: #e6f7ff;
-            color: #1890ff;
+            background: var(--bg-warning-light);
+            color: var(--primary-color);
           }
 
           &.period-month {
-            background: #f6ffed;
-            color: #52c41a;
+            background: var(--bg-success-light);
+            color: var(--success-color);
           }
 
           &.period-year {
-            background: #fff7e6;
-            color: #fa8c16;
+            background: var(--bg-warning-light);
+            color: var(--warning-color);
           }
 
           &.period-none {
-            background: #f5f5f5;
-            color: #999;
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
           }
         }
 
@@ -278,8 +281,8 @@
           .important-tag {
             font-size: 24px;
             padding: 4px 12px;
-            background: #fff2e8;
-            color: #fa8c16;
+            background: var(--primary-color-light);
+            color: var(--warning-color);
             border-radius: 20px;
             margin-right: 8px;
           }
@@ -287,8 +290,8 @@
           .urgent-tag {
             font-size: 24px;
             padding: 4px 12px;
-            background: #fff1f0;
-            color: #f5222d;
+            background: var(--bg-error-light);
+            color: var(--error-color);
             border-radius: 20px;
           }
         }
@@ -301,14 +304,14 @@
 
       .edit-btn {
         margin-right: 20px;
-        color: #1989fa;
+        color: var(--info-color);
         background: none;
         border: none;
         font-size: 28px;
       }
 
       .delete-btn {
-        color: #ee0a24;
+        color: var(--error-color-critical);
         background: none;
         border: none;
         font-size: 28px;
@@ -323,13 +326,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--shadow-modal);
   display: flex;
   justify-content: center;
   align-items: center;
 
   .modal-content {
-    background: white;
+    background: var(--bg-primary);
     padding: 40px;
     border-radius: 16px;
     width: 80%;
@@ -344,7 +347,7 @@
     .input {
       width: 100%;
       height: 80px;
-      border: 2px solid #ddd;
+      border: 2px solid var(--border-primary);
       border-radius: 8px;
       padding: 0 20px;
       margin-bottom: 40px;
@@ -359,12 +362,12 @@
         display: block;
         margin-bottom: 16px;
         font-size: 28px;
-        color: #666;
+        color: var(--text-secondary);
       }
 
       .modal-picker {
         height: 80px;
-        border: 2px solid #ddd;
+        border: 2px solid var(--border-primary);
         border-radius: 8px;
         padding: 0 20px;
         font-size: 28px;
@@ -377,8 +380,8 @@
 
       .save-btn {
         margin-right: 20px;
-        background-color: #07c160;
-        color: white;
+        background-color: var(--primary-color);
+        color: var(--text-white);
         border: none;
         border-radius: 8px;
         padding: 16px 40px;
@@ -386,8 +389,8 @@
       }
 
       .cancel-btn {
-        background-color: #f2f3f5;
-        color: #333;
+        background-color: var(--bg-gray-light);
+        color: var(--text-primary);
         border: none;
         border-radius: 8px;
         padding: 16px 40px;

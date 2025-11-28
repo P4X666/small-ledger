@@ -68,7 +68,7 @@
           <view class="task-content">
             <view :class="['checkbox-container', { completed: task.completed }]" @click="toggleTaskStatus(task.id)">
               <nut-icon :name="task.completed ? 'check-circle' : 'circle'" :size="24"
-                :color="task.completed ? '#07c160' : '#d9d9d9'" />
+                :color="task.completed ? 'var(--primary-color)' : '#d9d9d9'" />
             </view>
             <view class="task-main">
               <text :class="{ 'completed': task.completed }" class="task-title">{{ task.title }}</text>
@@ -92,10 +92,10 @@
           </view>
           <view class="task-actions">
             <nut-button @tap="editTask(task)" class="edit-btn">
-              <nut-icon name="edit" size="16" color="#1890ff" />
+              <nut-icon name="edit" size="16" color="var(--primary-color)" />
             </nut-button>
             <nut-button @tap="deleteTask(task.id)" class="delete-btn">
-              <nut-icon name="delete" size="16" color="#ff4d4f" />
+              <nut-icon name="delete" size="16" color="var(--danger-color)" />
             </nut-button>
           </view>
         </view>
@@ -194,12 +194,16 @@
         </view>
       </view>
     </view>
+    
+    <!-- 自定义底部栏 -->
+    <CustomTabBar />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, Ref } from 'vue';
 import { useTodoStore, type TimePeriod } from '@/store/todo';
+import CustomTabBar from '../../components/CustomTabBar/index.vue';
 import './index.scss'
 
 // 初始化store

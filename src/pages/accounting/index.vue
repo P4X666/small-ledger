@@ -172,10 +172,10 @@
           </view>
           <view class="record-actions">
             <button @tap="editRecord(record)" class="action-btn edit-btn">
-              <nut-icon name="edit" size="16" color="#1890ff" />
+              <nut-icon name="edit" size="16" color="var(--primary-color)" />
             </button>
             <button @tap="deleteRecord(record.id)" class="action-btn delete-btn">
-              <nut-icon name="delete" size="16" color="#f5222d" />
+              <nut-icon name="delete" size="16" color="var(--danger-color)" />
             </button>
           </view>
         </view>
@@ -256,12 +256,16 @@
         </view>
       </view>
     </view>
+    
+    <!-- 自定义底部栏 -->
+    <CustomTabBar />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useAccountingStore } from '@/store/accounting';
+import CustomTabBar from '../../components/CustomTabBar/index.vue';
 import type { RecordType, AccountingRecord } from '@/store/accounting';
 import Taro from '@tarojs/taro';
 import './index.scss'

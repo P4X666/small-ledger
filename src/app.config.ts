@@ -9,13 +9,16 @@ export default {
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#667eea',
+    navigationBarBackgroundColor: '#ff7d00',
     navigationBarTitleText: '家有小账本',
     navigationBarTextStyle: 'white'
   },
+  resolveAlias: {
+    "@/*": "/*"
+  },
   tabBar: {
-    color: '#999',
-    selectedColor: '#667eea',
+    custom: true,
+    selectedColor: '#ff7d00', // 使用CSS变量--primary-color的实际值，因为app.config.ts不支持CSS变量语法
     backgroundColor: '#fff',
     list: [
       {

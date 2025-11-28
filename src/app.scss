@@ -1,3 +1,107 @@
 page {
-    --primary-color: #1890ff;
+  /* ========== 主色调 - 品牌色 ========== */
+  --primary-color: #ff7d00; /* 主色 - 暖橙黄色 */
+  --primary-color-light: #fff2e8; /* 主色浅色背景 */
+  --primary-color-dark: #e66a00; /* 主色深色变体 */
+  
+  /* ========== 辅助色调 - 功能色 ========== */
+  --secondary-color: #ff9e42; /* 辅助色 - 浅橙色，与主色调和谐 */
+  --secondary-color-light: #fff8f0; /* 辅助色浅色背景 */
+  --secondary-color-dark: #e68a38; /* 辅助色深色变体 */
+  --secondary-color-lighter: #ffb366; /* 辅助色更浅变体 - 用于渐变 */
+  
+  /* ========== 功能色 - 状态反馈 ========== */
+  --success-color: #52c41a; /* 成功色 - 绿色 */
+  --success-color-light: #f6ffed; /* 成功色浅色背景 */
+  --success-color-lighter: #73d13d; /* 成功色更浅变体 - 用于渐变 */
+  --warning-color: #fa8c16; /* 警告色 - 橙色 */
+  --warning-color-light: #fff7e6; /* 警告色浅色背景 */
+  --warning-color-bright: #faad14; /* 警告色亮色变体 */
+  --error-color: #f5222d; /* 错误色 - 红色 */
+  --error-color-light: #fff1f0; /* 错误色浅色背景 */
+  --error-color-lighter: #ff4d4f; /* 错误色更浅变体 - 用于渐变 */
+  --error-color-lightest: #ff7875; /* 错误色最浅变体 */
+  --error-color-deep: #cf1322; /* 错误色深色变体 */
+  --info-color: #1989fa; /* 信息色 - 蓝色 */
+  --info-color-light: #f0f9ff; /* 信息色浅色背景 */
+  
+  /* ========== 中性色 - 文本与背景 ========== */
+  /* 文本颜色 */
+  --text-primary: #333333; /* 主文本色 */
+  --text-secondary: #666666; /* 次要文本色 */
+  --text-tertiary: #999999; /* 三级文本色/提示文字 */
+  --text-white: #ffffff; /* 白色文本 */
+  
+  /* 背景颜色 */
+  --bg-primary: #ffffff; /* 主背景色 */
+  --bg-secondary: #fafafa; /* 次要背景色 */
+  --bg-tertiary: #f5f5f5; /* 三级背景色 */
+  --bg-gray: #f8f8f8; /* 灰色背景 */
+  --bg-gray-light: #f2f3f5; /* 浅灰色背景 */
+  --bg-dark: #f0f0f0; /* 深色背景 */
+  --bg-info-light: #e6f7ff; /* 信息色浅色背景 */
+  --bg-success-light: #f6ffed; /* 成功色浅色背景 */
+  --bg-warning-light: #fff7e6; /* 警告色浅色背景 */
+  --bg-error-light: #fff1f0; /* 错误色浅色背景 */
+  
+  /* 边框颜色 */
+  --border-light: #f0f0f0; /* 浅色边框 */
+  --border-secondary: #e8e8e8; /* 次要边框 */
+  --border-primary: #e0e0e0; /* 主边框色 */
+  --border-dark: #d0d0d0; /* 深色边框 */
+  --border-error-light: #ffccc7; /* 错误色浅色边框 */
+  --border-success-light: #b7eb8f; /* 成功色浅色边框 */
+  --border-warning-light: #ffd591; /* 警告色浅色边框 */
+  --border-info-light: #91d5ff; /* 信息色浅色边框 */
+  
+  /* 阴影颜色 */
+  --shadow-light: rgba(0, 0, 0, 0.04); /* 浅色阴影 */
+  --shadow-primary: rgba(0, 0, 0, 0.05); /* 主阴影 */
+  --shadow-dark: rgba(0, 0, 0, 0.1); /* 深色阴影 */
+  --shadow-modal: rgba(0, 0, 0, 0.5); /* 模态框背景阴影 */
+  --shadow-deep: rgba(0, 0, 0, 0.15); /* 更深阴影 */
+  --shadow-focus: rgba(255, 158, 66, 0.1); /* 输入框聚焦时的阴影效果，与辅助色匹配 */
+  
+  /* ========== 特殊场景色 - 非标准颜色系统 ========== */
+  /* 财务相关颜色 - 按照用户心智模型使用的直观颜色编码 */
+  --income-color: #52c41a; /* 收入相关颜色 - 绿色代表增长与正向，符合用户对收入的心理预期 */
+  --expense-color: #f5222d; /* 支出相关颜色 - 红色代表减少与负向，符合用户对支出的心理预期 */
+  
+  /* 交互状态颜色 - 标准用户体验模式 */
+  --disabled-color: #cccccc; /* 禁用状态颜色 - 降低亮度和饱和度，符合可访问性最佳实践 */
+  --placeholder-color: #cccccc; /* 输入框占位文字颜色 - 使用与禁用色相同的颜色，保持视觉一致性 */
+  
+  /* 生态适配颜色 - 与微信生态保持一致 */
+  --wechat-green: #07c160; /* 微信支付绿色 - 必须严格使用此颜色以与微信支付按钮保持视觉一致性，不使用主品牌色 */
+  
+  /* 视觉设计特殊颜色 - 用于特定的视觉效果和品牌表达 */
+  --purple-color: #d47b00; /* 暖棕色 - 与主色调和谐，用于渐变效果 */
+  --cyan-color: #d4a066; /* 浅棕橙色 - 与主色调协调，用于特殊图标 */
+  --light-gray: #e1e8ed; /* 浅灰色 - 用于辅助图标或中性背景，比--bg-tertiary更深的灰色变体 */
+  
+  /* 安全相关颜色 - 高风险状态提醒 */
+  --error-color-critical: #ee0a24; /* 严重错误色 - 用于重要警告或不可逆操作的确认，比标准错误色更醒目 */
+  
+  /* ========== 透明度 ========== */
+  --opacity-10: 0.1; /* 10%透明度 */
+  --opacity-30: 0.3; /* 30%透明度 */
+  --opacity-50: 0.5; /* 50%透明度 */
+  --opacity-70: 0.7; /* 70%透明度 */
+  --opacity-90: 0.9; /* 90%透明度 */
+  
+  /* ========== 渐变颜色组 - 特殊视觉效果 ========== */
+  /* 渐变颜色仅在特定页面或组件上使用，遵循微信小程序设计规范中的克制使用原则 */
+  --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--purple-color) 100%); /* 主渐变 - 仅用于首页顶部区域，创造品牌视觉焦点，使用主色调的渐变效果 */
+  --gradient-secondary: linear-gradient(90deg, var(--secondary-color) 0%, var(--secondary-color-lighter) 100%); /* 辅助渐变 - 用于次要视觉区域，使用同色系渐变提供层次感 */
+  --gradient-success: linear-gradient(90deg, var(--success-color) 0%, var(--success-color-lighter) 100%); /* 成功渐变 - 用于成功状态的特殊展示，增强积极情绪表达 */
+  --gradient-error: linear-gradient(90deg, var(--error-color) 0%, var(--error-color-lighter) 100%); /* 错误渐变 - 用于错误状态的特殊展示，增强警示效果 */
+  
+  /* ========== 别名 - 确保兼容性 ========== */
+  --danger-color: var(--error-color); /* 危险色别名 - 确保与现有代码兼容 */
+  --danger-color-light: var(--error-color-light); /* 危险色浅色别名 */
+}
+
+.safe-area {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
 }

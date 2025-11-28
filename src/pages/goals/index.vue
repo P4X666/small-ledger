@@ -151,12 +151,16 @@
         </view>
       </view>
     </view>
+    
+    <!-- 自定义底部栏 -->
+    <CustomTabBar />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useGoalsStore } from '@/store/goals';
+import CustomTabBar from '../../components/CustomTabBar/index.vue';
 import type { SavingsGoal } from '@/store/goals';
 import Taro from '@tarojs/taro';
 import './index.scss'
