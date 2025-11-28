@@ -257,18 +257,17 @@
       </view>
     </view>
     
-    <!-- 自定义底部栏 -->
-    <CustomTabBar />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useAccountingStore } from '@/store/accounting';
-import CustomTabBar from '../../components/CustomTabBar/index.vue';
 import type { RecordType, AccountingRecord } from '@/store/accounting';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import './index.scss'
+import { EventChannel } from '@tarojs/shared';
+import { updateTabbarSelectedIndex } from '@/utils/common';
 
 // 使用记账状态管理
 const accountingStore = useAccountingStore();
@@ -422,5 +421,10 @@ const deleteRecord = (recordId: string) => {
 onMounted(() => {
   setCurrentMonth();
   accountingStore.loadRecords();
+});
+
+// 页面显示时更新底部栏高亮状态
+useDidShow(() => {
+  updateTabbarSelectedIndex(2);
 });
 </script>

@@ -152,18 +152,17 @@
       </view>
     </view>
     
-    <!-- 自定义底部栏 -->
-    <CustomTabBar />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useGoalsStore } from '@/store/goals';
-import CustomTabBar from '../../components/CustomTabBar/index.vue';
 import type { SavingsGoal } from '@/store/goals';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import './index.scss'
+import { EventChannel } from '@tarojs/shared';
+import { updateTabbarSelectedIndex } from '@/utils/common';
 
 // 使用目标状态管理
 const goalsStore = useGoalsStore();
@@ -238,5 +237,11 @@ const closeUpdateModal = () => {
 // 生命周期钩子
 onMounted(() => {
   goalsStore.loadGoals();
+});
+
+// 页面显示时更新底部栏高亮状态
+useDidShow(() => {
+  // 调用自定义tabBar的update方法
+  updateTabbarSelectedIndex(3);
 });
 </script>

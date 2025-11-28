@@ -195,16 +195,15 @@
       </view>
     </view>
     
-    <!-- 自定义底部栏 -->
-    <CustomTabBar />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, Ref } from 'vue';
 import { useTodoStore, type TimePeriod } from '@/store/todo';
-import CustomTabBar from '../../components/CustomTabBar/index.vue';
 import './index.scss'
+import Taro, { useDidShow } from '@tarojs/taro';
+import { updateTabbarSelectedIndex } from '@/utils/common';
 
 // 初始化store
 const todoStore = useTodoStore();
@@ -249,6 +248,10 @@ onMounted(() => {
   todoStore.loadTasks();
 });
 
+// 页面显示时更新底部栏高亮状态
+useDidShow(() => {
+  updateTabbarSelectedIndex(1);
+}); 
 // 切换视图模式
 const switchViewMode = (mode: 'list' | 'quadrant') => {
   viewMode.value = mode;

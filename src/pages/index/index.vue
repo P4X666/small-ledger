@@ -87,16 +87,13 @@
         <text class="action-text">目标管理</text>
       </view>
     </view>
-    
-    <!-- 自定义底部栏 -->
-    <CustomTabBar />
   </view>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import Taro from '@tarojs/taro';
-import CustomTabBar from '../../components/CustomTabBar/index.vue';
+import Taro, { useDidShow } from '@tarojs/taro';
+import { updateTabbarSelectedIndex } from '@/utils/common';
 import './index.scss'
 
 // 状态管理
@@ -211,11 +208,6 @@ const toggleTaskStatus = (taskId) => {
   }
 };
 
-// 今日概览数据
-const todayTasks = ref(5);
-const todayIncome = ref('1000.00');
-const todayExpense = ref('235.50');
-
 // 导航到指定页面
 // 增强navigateTo函数，添加参数检查
 const navigateTo = (url) => {
@@ -224,7 +216,7 @@ const navigateTo = (url) => {
     return;
   }
   
-  Taro.navigateTo({
+  Taro.switchTab({
     url,
     fail: (err) => {
       console.error('导航失败:', err);
@@ -239,5 +231,10 @@ const navigateTo = (url) => {
 // 页面加载时的初始化
 onMounted(() => {
   // 这里可以从store获取真实数据
+});
+
+// 页面显示时更新底部栏高亮状态
+useDidShow(() => {
+  updateTabbarSelectedIndex(0);
 });
 </script>
