@@ -1,7 +1,7 @@
 /* autoprefixer: off */
 .index-page {
   padding: 32rpx;
-  padding-bottom: 100rpx; /* 为底部栏留出空间 */
+  padding-bottom: 150rpx; /* 为底部栏留出空间 */
   background-color: var(--bg-primary);
   min-height: 100vh;
 }
@@ -85,14 +85,12 @@
 }
 
 .task-item {
-  display: flex;
-  align-items: center;
-  padding: 20rpx 0;
+  overflow: hidden;
+  // padding: 20rpx 0;
   border-bottom: 1rpx solid var(--border-color);
-}
-
-.task-item:last-child {
-  border-bottom: none;
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .task-checkbox {
@@ -280,4 +278,10 @@
   font-size: 28rpx;
   color: var(--text-primary);
   font-weight: 500;
+}
+
+.task-desc {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }

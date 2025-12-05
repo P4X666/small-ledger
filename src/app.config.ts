@@ -2,6 +2,8 @@ export default {
   pages: [
     'pages/index/index',
     'pages/todolist/index',
+    'pages/todolist/create/index',
+    'pages/todolist/edit/index',
     'pages/accounting/index',
     'pages/goals/index',
     'pages/goals/create/index',

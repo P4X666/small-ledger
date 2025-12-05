@@ -1,5 +1,5 @@
 <template>
-  <view class="index-page">
+  <view class="index-page safe-area">
     <!-- 头部问候语 -->
     <view class="header">
       <text class="greeting">{{ greetingMessage }}</text>
@@ -8,7 +8,7 @@
     
     <!-- 新建任务按钮 -->
     <view class="add-task-section">
-      <button class="add-task-btn" @click="navigateTo('/pages/todolist/index?action=add')">
+      <button class="add-task-btn" @click="navigateTo('/pages/todolist/create/index')">
         <text class="add-icon">+</text>
         <text class="add-text">新建任务</text>
       </button>
@@ -22,21 +22,27 @@
       </view>
       
       <view class="tasks-list" v-if="importantPendingTasks && importantPendingTasks.length > 0">
-        <view class="task-item" v-for="task in displayTasks" :key="task?.id || Math.random()">
-          <view class="task-checkbox" @click="toggleTaskStatus(task.id)">
-            <view class="checkbox" :class="{ checked: task.completed }">
-              <text v-if="task.completed" class="check-icon">✓</text>
-            </view>
-          </view>
-          <view class="task-content">
-            <text class="task-title">{{ task.title || '未命名任务' }}</text>
-            <text v-if="task.priority?.important && task.priority?.urgent" class="priority-badge important-urgent">重要紧急</text>
-            <text v-else-if="task.priority?.important" class="priority-badge important">重要</text>
-            <text v-else-if="task.priority?.urgent" class="priority-badge urgent">紧急</text>
-          </view>
-          <view class="task-arrow" @click="navigateTo(`/pages/todolist/index?action=edit&id=${task.id}`)">
-            <text>›</text>
-          </view>
+        <view class="task-item" v-for="task in displayTasks" :key="task.id">
+          <nut-swipe>
+            <template #left>
+              <nut-button shape="square" style="height: 100%" type="danger">放弃</nut-button>
+            </template>
+            <nut-cell :title="task.title" center>
+              <template #link>
+                <view class="task-desc" @click="navigateTo(`/pages/todolist/edit/index?id=${task.id}`)">
+                  <text v-if="task.priority?.important && task.priority?.urgent" class="priority-badge important-urgent">重要紧急</text>
+                  <text v-else-if="task.priority?.important" class="priority-badge important">重要</text>
+                  <text v-else-if="task.priority?.urgent" class="priority-badge urgent">紧急</text>
+                  <view class="task-arrow">
+                    <text>›</text>
+                  </view>
+                </view>
+              </template>
+            </nut-cell>
+            <template #right>
+              <nut-button shape="square" style="height: 100%" type="success">完成</nut-button>
+            </template>
+          </nut-swipe>
         </view>
         
         <!-- 显示更多任务 -->
@@ -65,7 +71,7 @@
     </view>
     
     <!-- 快捷入口 -->
-    <view class="quick-actions">
+    <view class="quick-actions safe-area">
       <view class="quick-action" @click="navigateTo('/pages/todolist/index')">
         <view class="quick-action-icon task">
           <text class="icon-text">任务</text>
@@ -94,6 +100,7 @@
 import { ref, computed, onMounted } from 'vue';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { updateTabbarSelectedIndex } from '@/utils/common';
+import { TAB_PAGE } from '@/constants/tab-page';
 import './index.scss'
 
 // 状态管理
@@ -215,17 +222,8 @@ const navigateTo = (url) => {
     console.error('导航URL不能为空');
     return;
   }
-  
-  Taro.switchTab({
-    url,
-    fail: (err) => {
-      console.error('导航失败:', err);
-      Taro.showToast({
-        title: '页面跳转失败',
-        icon: 'error'
-      });
-    }
-  });
+  const handleTabClick = TAB_PAGE[url]?Taro.switchTab:Taro.navigateTo;
+  handleTabClick({url});
 };
 
 // 页面加载时的初始化

@@ -295,25 +295,9 @@ const handleEditingUrgentChange = (event: any) => {
 
 // 添加新任务
 const addTask = () => {
-  if (newTaskTitle.value.trim()) {
-    const selectedPeriod = timePeriods.value[newTaskPeriodIndex.value].value;
-
-    todoStore.addTask({
-      title: newTaskTitle.value.trim(),
-      completed: false,
-      timePeriod: selectedPeriod,
-      priority: {
-        important: newTaskImportant.value,
-        urgent: newTaskUrgent.value
-      }
-    });
-
-    // 重置表单
-    newTaskTitle.value = '';
-    newTaskPeriodIndex.value = 0;
-    newTaskImportant.value = false;
-    newTaskUrgent.value = false;
-  }
+  Taro.navigateTo({
+    url: '/pages/todolist/create/index'
+  });
 };
 
 // 切换任务状态
