@@ -1,0 +1,120 @@
+.login-page {
+  padding: 32rpx;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+  .logo {
+    text-align: center;
+    margin: 64rpx 0;
+    
+    .logo-text {
+      font-size: 48rpx;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+  }
+  
+  // .form-section {
+  //   flex: 1;
+  //   display: flex;
+  //   flex-direction: column;
+  // }
+  
+  .form-title {
+    font-size: 36rpx;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 32rpx;
+    text-align: center;
+  }
+  
+  .nut-form {
+    .nut-cell-group {
+      .nut-cell-group__wrap {
+        padding-block: 64rpx;
+        .nut-form-item{
+          padding-inline: 64rpx;
+        }
+      }
+    }
+    
+    .nut-form-item {
+      margin-bottom: 24rpx;
+      
+      .nut-input {
+        height: 96rpx;
+        font-size: 32rpx;
+        
+        .nut-input__input {
+          color: var(--text-primary);
+          
+          &::placeholder {
+            color: var(--placeholder-color);
+          }
+        }
+      }
+      
+      .nut-form-item__error {
+        font-size: 24rpx;
+        color: var(--error-color);
+      }
+    }
+  }
+  
+  .remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 24rpx 0 48rpx 0;
+    padding-inline: 96rpx;
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+      
+      .nut-checkbox {
+        margin-right: 12rpx;
+      }
+      
+      .remember-text {
+        font-size: 28rpx;
+        color: var(--text-secondary);
+      }
+    }
+    
+    .forgot-password {
+      font-size: 28rpx;
+      color: var(--primary-color);
+    }
+  }
+  
+  .login-button {
+    margin: 32rpx 0;
+    padding: 0 32rpx;
+    .nut-button {
+      height: 96rpx;
+      font-size: 36rpx;
+      font-weight: 500;
+      border-radius: 16rpx;
+    }
+  }
+  
+  .switch-page {
+    text-align: center;
+    margin-top: 32rpx;
+    
+    .switch-text {
+      display: flex;
+      justify-content: center;
+      font-size: 28rpx;
+      color: var(--text-secondary);
+      
+      .switch-link {
+        color: var(--primary-color);
+        margin-left: 8rpx;
+      }
+    }
+  }
+}

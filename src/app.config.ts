@@ -7,7 +7,9 @@ export default {
     'pages/accounting/index',
     'pages/goals/index',
     'pages/goals/create/index',
-    'pages/goals/edit/index'
+    'pages/goals/edit/index',
+    'pages/login/index',
+    'pages/register/index',
   ],
   window: {
     backgroundTextStyle: 'light',

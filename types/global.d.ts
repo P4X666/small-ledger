@@ -29,3 +29,6 @@ declare namespace NodeJS {
 declare module '@tarojs/components' {
   export * from '@tarojs/components/types/index.vue3'
 }
+
+// 全局环境变量声明
+declare const BASE_URL: string;

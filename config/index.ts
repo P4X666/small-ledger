@@ -34,8 +34,6 @@ export default defineConfig(async (merge, { command, mode }) => {
     sass: {
       data: `@import "@nutui/nutui-taro/dist/styles/variables.scss";`,
     },
-    defineConstants: {
-    },
     copy: {
       patterns: [
         {

@@ -217,7 +217,7 @@ const toggleTaskStatus = (taskId) => {
 
 // 导航到指定页面
 // 增强navigateTo函数，添加参数检查
-const navigateTo = (url) => {
+const navigateTo = (url: string) => {
   if (!url) {
     console.error('导航URL不能为空');
     return;
