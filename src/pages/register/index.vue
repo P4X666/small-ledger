@@ -29,7 +29,8 @@
           label="密码" 
           prop="password" 
           :rules="[{ required: true, message: '请输入密码' }, { min: 8, max: 20, message: '密码长度为8-20个字符' }, { pattern: /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,20}$/, message: '密码必须包含字母和数字' }]"
-        >
+          :show-error-message="false"
+          >
           <nut-input 
             v-model="formData.password" 
             placeholder="请输入密码" 
@@ -46,6 +47,7 @@
           label="确认密码" 
           prop="confirmPassword" 
           :rules="[{ required: true, message: '请确认密码' }, { validator: validateConfirmPassword }]"
+          :show-error-message="false"
         >
           <nut-input 
             v-model="formData.confirmPassword" 
@@ -150,15 +152,16 @@ const handleRegister = async () => {
     // 发起注册请求
     await register(params);
     
-    // 注册成功，跳转到登录页面
+    // 注册成功，先显示Toast
+    openToast('success', '注册成功，请登录');
+    
+    // 跳转到登录页面
     Taro.redirectTo({
       url: '/pages/login/index'
     });
-    
-    openToast('success', '注册成功，请登录');
+    loading.value = false;
   } catch (error: any) {
     openToast('fail', error.message || '注册失败，请重试');
-  } finally {
     // 关闭加载状态
     loading.value = false;
   }

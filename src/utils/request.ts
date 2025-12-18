@@ -24,7 +24,7 @@ interface RequestOptions extends Taro.request.Option {
  * @returns Promise对象
  */
 export const request = (options: RequestOptions): Promise<any> => {
-  const { url, method, data, showLoading, loadingTitle, loadingMask, ...restOptions } = options;
+  const { url, method, showLoading, loadingTitle, loadingMask, ...restOptions } = options;
   // 合并基础配置和用户配置
   const config = {
     url: `${BASE_URL}${url}`,
@@ -53,7 +53,6 @@ export const request = (options: RequestOptions): Promise<any> => {
       mask: loadingMask ?? true
     });
   }
-
   // 返回Promise
   return new Promise((resolve, reject) => {
     // 调用原生Taro.request

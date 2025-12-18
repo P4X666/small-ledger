@@ -1,3 +1,4 @@
+import Taro from '@tarojs/taro';
 import { post } from '../utils/request';
 
 // API响应数据类型
@@ -59,6 +60,11 @@ export const login = async (params: LoginParams): Promise<LoginData> => {
       showLoading: true,
       loadingTitle: '登录中...'
     });
+    if(response.statusCode !== 200){
+      throw new Error(response.data.message || '登录失败，请重试');
+    }
+    // 登录成功，保存token和用户信息
+    Taro.setStorageSync('token', response.data.data.access_token);
     return (response as RequestResponse<LoginData>).data.data;
   } catch (error: any) {
     throw new Error(error.message || '登录失败，请重试');

@@ -245,8 +245,17 @@ const quadrantTasks = computed(() => {
 
 // 生命周期钩子，加载任务数据
 onMounted(() => {
-  todoStore.loadTasks();
+  loadTasks();
 });
+
+// 加载任务数据
+const loadTasks = async () => {
+  try {
+    await todoStore.loadTasks();
+  } catch (error) {
+    console.error('加载任务失败:', error);
+  }
+};
 
 // 页面显示时更新底部栏高亮状态
 useDidShow(() => {
@@ -301,8 +310,12 @@ const addTask = () => {
 };
 
 // 切换任务状态
-const toggleTaskStatus = (id: string) => {
-  todoStore.toggleTaskStatus(id);
+const toggleTaskStatus = async (id: string) => {
+  try {
+    await todoStore.toggleTaskStatus(id);
+  } catch (error) {
+    console.error('切换任务状态失败:', error);
+  }
 };
 
 // 编辑任务
@@ -318,20 +331,28 @@ const editTask = (task: any) => {
 };
 
 // 保存编辑后的任务
-const saveEditedTask = () => {
+const saveEditedTask = async () => {
   if (editingTask.value && editingTask.value.title.trim()) {
     const selectedPeriod = timePeriods.value[editingTaskPeriodIndex.value].value;
 
-    todoStore.updateTask(editingTask.value.id, {
-      title: editingTask.value.title.trim(),
-      timePeriod: selectedPeriod,
-      priority: {
-        important: editingTaskImportant.value,
-        urgent: editingTaskUrgent.value
-      }
-    });
+    try {
+      await todoStore.updateTask(editingTask.value.id, {
+        title: editingTask.value.title.trim(),
+        timePeriod: selectedPeriod,
+        priority: {
+          important: editingTaskImportant.value,
+          urgent: editingTaskUrgent.value
+        }
+      });
 
-    editingTask.value = null;
+      editingTask.value = null;
+    } catch (error: any) {
+      Taro.showToast({
+        title: error.message || '任务更新失败',
+        icon: 'none',
+        duration: 2000
+      });
+    }
   }
 };
 
@@ -341,7 +362,31 @@ const cancelEdit = () => {
 };
 
 // 删除任务
-const deleteTask = (id: string) => {
-  todoStore.deleteTask(id);
+const deleteTask = async (id: string) => {
+  try {
+    // 显示确认对话框
+    const confirmResult = await Taro.showModal({
+      title: '确认删除',
+      content: '确定要删除这个任务吗？',
+      cancelText: '取消',
+      confirmText: '删除',
+      confirmColor: '#ff4d4f'
+    });
+
+    if (confirmResult.confirm) {
+      await todoStore.deleteTask(id);
+      Taro.showToast({
+        title: '任务删除成功',
+        icon: 'success',
+        duration: 1500
+      });
+    }
+  } catch (error: any) {
+    Taro.showToast({
+      title: error.message || '任务删除失败',
+      icon: 'none',
+      duration: 2000
+    });
+  }
 };
 </script>

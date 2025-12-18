@@ -15,7 +15,8 @@ export default {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#ff7d00',
     navigationBarTitleText: '家有小账本',
-    navigationBarTextStyle: 'white'
+    navigationBarTextStyle: 'white',
+    navigationStyle: 'custom',
   },
   resolveAlias: {
     "@/*": "/*"

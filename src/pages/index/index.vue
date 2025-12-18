@@ -1,5 +1,6 @@
 <template>
   <view class="index-page safe-area">
+    <!-- <nut-navbar  @click-back="onClick"></nut-navbar> -->
     <!-- 头部问候语 -->
     <view class="header">
       <text class="greeting">{{ greetingMessage }}</text>

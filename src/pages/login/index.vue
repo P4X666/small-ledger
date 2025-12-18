@@ -15,6 +15,7 @@
           label="用户名" 
           prop="username" 
           :rules="[{ required: true, message: '请输入用户名' }, { min: 6, max: 20, message: '用户名长度为6-20个字符' }]"
+          :show-error-message="false"
         >
           <nut-input 
             v-model="formData.username" 
@@ -29,6 +30,7 @@
           label="密码" 
           prop="password" 
           :rules="[{ required: true, message: '请输入密码' }, { min: 8, max: 20, message: '密码长度为8-20个字符' }]"
+          :show-error-message="false"
         >
           <nut-input 
             v-model="formData.password" 
@@ -125,11 +127,7 @@ const handleLogin = async () => {
     };
     
     // 发起登录请求
-    const response = await login(params);
-    
-    // 登录成功，保存Token和用户信息
-    Taro.setStorageSync('token', response.data?.token || '');
-    Taro.setStorageSync('userInfo', response.data?.user || {});
+    await login(params);
     
     // 如果勾选了记住我，保存用户名
     if (formData.rememberMe) {

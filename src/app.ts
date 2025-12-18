@@ -6,7 +6,7 @@ import { isTokenExpired, redirectToLogin } from './utils/auth'
 import './app.scss'
 
 const App = createApp({
-  onShow(options) {
+  onShow(_options) {
     updateManager()
   },
   onLaunch() {

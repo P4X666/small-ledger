@@ -4,7 +4,7 @@
   "description": "家有小账本",
   "appid": "wx8748553a65c9a0b4",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "es6": true,
     "compileHotReLoad": false,
     "postcss": false,

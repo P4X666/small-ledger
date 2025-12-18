@@ -243,35 +243,45 @@ const isPriorityActive = (quadrant: number): boolean => {
 };
 
 // 创建任务
-const createTask = () => {
+const createTask = async () => {
   if (!isFormValid.value) {
     validateForm();
     return;
   }
   
-  // 准备任务数据
-  const taskData = {
-    title: taskForm.title,
-    completed: false,
-    timePeriod: taskForm.timePeriod,
-    priority: taskForm.priority,
-    dueDate: taskForm.dueDate
-  };
-  
-  // 添加任务
-  todoStore.addTask(taskData);
-  
-  // 显示成功提示
-  Taro.showToast({
-    title: '任务创建成功',
-    icon: 'success',
-    duration: 1500
-  });
-  
-  // 返回上一页
-  setTimeout(() => {
-    Taro.navigateBack();
-  }, 1500);
+  try {
+    // 准备任务数据
+    const taskData = {
+      title: taskForm.title,
+      completed: false,
+      timePeriod: taskForm.timePeriod,
+      priority: taskForm.priority,
+      dueDate: taskForm.dueDate,
+      description: taskForm.description
+    };
+    
+    // 添加任务（异步调用API）
+    await todoStore.addTask(taskData);
+    
+    // 显示成功提示
+    Taro.showToast({
+      title: '任务创建成功',
+      icon: 'success',
+      duration: 1500
+    });
+    
+    // 返回上一页
+    setTimeout(() => {
+      Taro.navigateBack();
+    }, 1500);
+  } catch (error: any) {
+    // 显示错误提示
+    Taro.showToast({
+      title: error.message || '任务创建失败',
+      icon: 'none',
+      duration: 2000
+    });
+  }
 };
 
 // 返回上一页

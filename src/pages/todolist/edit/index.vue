@@ -304,34 +304,44 @@ const isPriorityActive = (quadrant: number): boolean => {
 };
 
 // 更新任务
-const updateTask = () => {
+const updateTask = async () => {
   if (!isFormValid.value) {
     validateForm();
     return;
   }
   
-  // 准备更新数据
-  const updates = {
-    title: taskForm.title,
-    timePeriod: taskForm.timePeriod,
-    priority: taskForm.priority,
-    dueDate: taskForm.dueDate
-  };
-  
-  // 更新任务
-  todoStore.updateTask(taskId.value, updates);
-  
-  // 显示成功提示
-  Taro.showToast({
-    title: '任务更新成功',
-    icon: 'success',
-    duration: 1500
-  });
-  
-  // 返回上一页
-  setTimeout(() => {
-    Taro.navigateBack();
-  }, 1500);
+  try {
+    // 准备更新数据
+    const updates = {
+      title: taskForm.title,
+      timePeriod: taskForm.timePeriod,
+      priority: taskForm.priority,
+      dueDate: taskForm.dueDate,
+      description: taskForm.description
+    };
+    
+    // 更新任务（异步调用API）
+    await todoStore.updateTask(taskId.value, updates);
+    
+    // 显示成功提示
+    Taro.showToast({
+      title: '任务更新成功',
+      icon: 'success',
+      duration: 1500
+    });
+    
+    // 返回上一页
+    setTimeout(() => {
+      Taro.navigateBack();
+    }, 1500);
+  } catch (error: any) {
+    // 显示错误提示
+    Taro.showToast({
+      title: error.message || '任务更新失败',
+      icon: 'none',
+      duration: 2000
+    });
+  }
 };
 
 // 返回上一页
