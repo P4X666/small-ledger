@@ -1,5 +1,5 @@
 <template>
-  <view class="login-page">
+  <view class="login-page" :style="{ paddingTop: `${navigationBarHeight}px` }">
     <!-- Logo和标题 -->
     <view class="logo">
       <text class="logo-text">家有小账本</text>
@@ -9,7 +9,7 @@
     <view class="form-section">
       <!-- <view class="form-title">欢迎回来</view> -->
       
-      <nut-form :model="formData" ref="formRef">
+      <nut-form :model-value="formData" ref="formRef">
         <!-- 用户名输入 -->
         <nut-form-item 
           label="用户名" 
@@ -45,10 +45,6 @@
         
         <!-- 记住我和忘记密码 -->
         <view class="remember-forgot">
-          <view class="remember-me">
-            <nut-checkbox v-model="formData.rememberMe" />
-            <text class="remember-text">记住我</text>
-          </view>
           <text class="forgot-password">忘记密码？</text>
         </view>
         
@@ -82,13 +78,16 @@
 import { ref, reactive } from 'vue';
 import Taro from '@tarojs/taro';
 import { login, LoginParams } from '@/api/auth';
+import { useNavigationBar } from '@/utils/navigation';
 import './index.scss';
+
+// 使用顶部栏高度管理组合式函数
+const { statusBarHeight, navigationBarHeight } = useNavigationBar();
 
 // 表单数据
 const formData = reactive({
   username: '',
-  password: '',
-  rememberMe: false
+  password: ''
 });
 
 const state = reactive({
@@ -112,42 +111,34 @@ const formRef = ref<any>(null);
 const handleLogin = async () => {
   // 表单验证
   if (!formRef.value) return;
-  
-  const valid = await formRef.value.validate();
-  if (!valid) return;
-  
-  // 设置加载状态
-  loading.value = true;
-  
-  try {
-    // 登录请求参数
-    const params: LoginParams = {
-      username: formData.username,
-      password: formData.password
-    };
-    
-    // 发起登录请求
-    await login(params);
-    
-    // 如果勾选了记住我，保存用户名
-    if (formData.rememberMe) {
-      Taro.setStorageSync('rememberedUsername', formData.username);
-    } else {
-      Taro.removeStorageSync('rememberedUsername');
+  formRef.value.validate().then(async ({ valid, errors }) => {
+    if (valid) {
+      try {
+        // 设置加载状态
+        loading.value = true;
+        // 登录请求参数
+        const params: LoginParams = {
+          username: formData.username,
+          password: formData.password,
+        };
+
+        // 发起登录请求
+        await login(params);
+        
+        // 跳转到首页
+        Taro.switchTab({
+          url: '/pages/index/index'
+        });
+        loading.value = false;
+      } catch (error: any) {
+        openToast('fail', error.message || '登录失败，请重试');
+        // 关闭加载状态
+        loading.value = false;
+      }
+      return
     }
-    
-    // 跳转到首页
-    Taro.switchTab({
-      url: '/pages/index/index'
-    });
-    
-    openToast('success', '登录成功');
-  } catch (error: any) {
-    openToast('fail', error.message || '登录失败，请重试');
-  } finally {
-    // 关闭加载状态
-    loading.value = false;
-  }
+    console.error(errors);
+  });
 };
 
 const openToast = (type: 'success' | 'fail', msg: string, cover = false) => {
@@ -157,18 +148,6 @@ const openToast = (type: 'success' | 'fail', msg: string, cover = false) => {
   state.cover = cover
 }
 const onClosed = () => console.log('closed')
-
-// 初始化，从本地存储获取记住的用户名
-const init = () => {
-  const rememberedUsername = Taro.getStorageSync('rememberedUsername');
-  if (rememberedUsername) {
-    formData.username = rememberedUsername;
-    formData.rememberMe = true;
-  }
-};
-
-// 页面加载时初始化
-init();
 
 // 跳转到注册页面
 const navigateToRegister = () => {

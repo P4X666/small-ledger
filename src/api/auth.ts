@@ -82,6 +82,11 @@ export const register = async (params: RegisterParams): Promise<RegisterData> =>
       showLoading: true,
       loadingTitle: '注册中...'
     });
+    if(response.statusCode !== 201){
+      throw new Error(response.data.message || '注册失败，请重试');
+    }
+    // 登录成功，保存token和用户信息
+    Taro.setStorageSync('token', response.data.data.access_token);
     return (response as RequestResponse<RegisterData>).data.data;
   } catch (error: any) {
     throw new Error(error.message || '注册失败，请重试');

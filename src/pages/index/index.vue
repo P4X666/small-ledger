@@ -1,5 +1,5 @@
 <template>
-  <view class="index-page safe-area">
+  <view class="index-page safe-area" :style="{ paddingTop: `${navigationBarHeight}px` }">
     <!-- <nut-navbar  @click-back="onClick"></nut-navbar> -->
     <!-- 头部问候语 -->
     <view class="header">
@@ -101,8 +101,12 @@
 import { ref, computed, onMounted } from 'vue';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { updateTabbarSelectedIndex } from '@/utils/common';
+import { useNavigationBar } from '@/utils/navigation';
 import { TAB_PAGE } from '@/constants/tab-page';
 import './index.scss'
+
+// 使用顶部栏高度管理组合式函数
+const { navigationBarHeight } = useNavigationBar();
 
 // 状态管理
 const showAllTasks = ref(false);
