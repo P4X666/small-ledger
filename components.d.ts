@@ -9,7 +9,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     NutButton: typeof import('@nutui/nutui-taro')['Button']
     NutCell: typeof import('@nutui/nutui-taro')['Cell']
-    NutCheckbox: typeof import('@nutui/nutui-taro')['Checkbox']
     NutForm: typeof import('@nutui/nutui-taro')['Form']
     NutFormItem: typeof import('@nutui/nutui-taro')['FormItem']
     NutIcon: typeof import('@nutui/nutui-taro')['Icon']

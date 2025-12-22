@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <view class="container" :style="{ paddingTop: navigationBarHeight + 'px' }">
 
     <view class="form-content">
       <!-- 任务名称 -->
@@ -122,8 +122,10 @@ import { ref, reactive, computed } from 'vue';
 import { useTodoStore } from '@/store/todo';
 import type { TimePeriod, TaskPriority } from '@/store/todo';
 import Taro from '@tarojs/taro';
+import { useNavigationBar } from '@/utils/navigation';
 import './index.scss';
 
+const { navigationBarHeight } = useNavigationBar();
 // 使用任务状态管理
 const todoStore = useTodoStore();
 

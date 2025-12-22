@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <view class="container" :style="{ paddingTop: navigationBarHeight + 'px' }">
     <view class="header">
       <view class="title-wrapper">
         <text class="title">记账功能</text>
@@ -265,10 +265,11 @@ import { ref, computed, onMounted } from 'vue';
 import { useAccountingStore } from '@/store/accounting';
 import type { RecordType, AccountingRecord } from '@/store/accounting';
 import Taro, { useDidShow } from '@tarojs/taro';
-import './index.scss'
-import { EventChannel } from '@tarojs/shared';
 import { updateTabbarSelectedIndex } from '@/utils/common';
+import { useNavigationBar } from '@/utils/navigation';
+import './index.scss'
 
+const { navigationBarHeight } = useNavigationBar();
 // 使用记账状态管理
 const accountingStore = useAccountingStore();
 

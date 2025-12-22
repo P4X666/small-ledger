@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <view class="container" :style="{ paddingTop: navigationBarHeight + 'px' }">
     <view class="header">
       <nut-button type="default" @tap="goBack" class="back-btn">
         <nut-icon name="arrow-left" size="18" color="#333" />
@@ -74,8 +74,10 @@ import { ref, computed } from 'vue';
 import { useGoalsStore } from '@/store/goals';
 import type { GoalPeriod } from '@/store/goals';
 import Taro, { useDidShow, useLoad } from '@tarojs/taro';
+import { useNavigationBar } from '@/utils/navigation';
 import './index.scss'
 
+const { navigationBarHeight } = useNavigationBar();
 // 使用目标状态管理
 const goalsStore = useGoalsStore();
 

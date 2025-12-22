@@ -60,7 +60,7 @@ export const login = async (params: LoginParams): Promise<LoginData> => {
       showLoading: true,
       loadingTitle: '登录中...'
     });
-    if(response.statusCode !== 200){
+    if(response.data.code !== 200){
       throw new Error(response.data.message || '登录失败，请重试');
     }
     // 登录成功，保存token和用户信息

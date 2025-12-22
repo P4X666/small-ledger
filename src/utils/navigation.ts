@@ -33,9 +33,7 @@ export const useNavigationBar = () => {
       // 胶囊按钮信息
       menuButtonInfo.value = menuButton;
       
-      // 计算导航栏高度：胶囊按钮底部距离 - 胶囊按钮顶部距离 + 胶囊按钮顶部距离到状态栏底部距离
-      // 公式：(menuButton.bottom - menuButton.top) + (menuButton.top - statusBarHeight)
-      navigationBarHeight.value = (menuButton.bottom - menuButton.top) + (menuButton.top - statusBarHeight.value);
+      navigationBarHeight.value = menuButton.bottom;
     } catch (error) {
       console.error("获取导航栏信息失败：", error);
     }

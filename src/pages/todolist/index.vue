@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <view class="container" :style="{ paddingTop: navigationBarHeight + 'px' }">
     <view class="header">
       <text class="title">任务管理</text>
     </view>
@@ -201,10 +201,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, Ref } from 'vue';
 import { useTodoStore, type TimePeriod } from '@/store/todo';
-import './index.scss'
 import Taro, { useDidShow } from '@tarojs/taro';
 import { updateTabbarSelectedIndex } from '@/utils/common';
+import { useNavigationBar } from '@/utils/navigation';
+import './index.scss'
 
+const { navigationBarHeight } = useNavigationBar();
 // 初始化store
 const todoStore = useTodoStore();
 
