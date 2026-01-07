@@ -160,8 +160,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useGoalsStore } from '@/store/goals';
 import type { SavingsGoal } from '@/store/goals';
 import Taro, { useDidShow } from '@tarojs/taro';
-import { updateTabbarSelectedIndex } from '@/utils/common';
 import { useNavigationBar } from '@/utils/navigation';
+import { getTabBarInstance } from '@/utils/tab-bar';
 import './index.scss'
 
 const { navigationBarHeight } = useNavigationBar();
@@ -240,9 +240,9 @@ onMounted(() => {
   goalsStore.loadGoals();
 });
 
-// 页面显示时更新底部栏高亮状态
+// 页面显示时更新底部栏高亮状态并刷新数据
 useDidShow(() => {
-  // 调用自定义tabBar的update方法
-  updateTabbarSelectedIndex(3);
+  const tabBar = getTabBarInstance();
+  tabBar.updateTabbarSelectedIndex(3);
 });
 </script>

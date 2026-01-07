@@ -265,9 +265,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useAccountingStore } from '@/store/accounting';
 import type { RecordType, AccountingRecord } from '@/store/accounting';
 import Taro, { useDidShow } from '@tarojs/taro';
-import { updateTabbarSelectedIndex } from '@/utils/common';
 import { useNavigationBar } from '@/utils/navigation';
 import './index.scss'
+import { getTabBarInstance } from '@/utils/tab-bar';
 
 const { navigationBarHeight } = useNavigationBar();
 // 使用记账状态管理
@@ -424,8 +424,9 @@ onMounted(() => {
   accountingStore.loadRecords();
 });
 
-// 页面显示时更新底部栏高亮状态
+// 页面显示时更新底部栏高亮状态并刷新数据
 useDidShow(() => {
-  updateTabbarSelectedIndex(2);
+  const tabBar = getTabBarInstance();
+  tabBar.updateTabbarSelectedIndex(2);
 });
 </script>

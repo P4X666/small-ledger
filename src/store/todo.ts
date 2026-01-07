@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import Taro from '@tarojs/taro';
 import { 
   getAllTasks, 
+  getTaskById,
   createTask, 
   updateTask as apiUpdateTask, 
   updateTaskStatus, 
@@ -10,55 +11,81 @@ import {
   getTasksByTimePeriod as apiGetTasksByTimePeriod,
   getTasksByQuadrant as apiGetTasksByQuadrant
 } from '@/api/todo';
+import { TaskStatus } from '@/constants/common';
+import dayjs from 'dayjs';
 
 // 时间周期类型
 export type TimePeriod = 'week' | 'month' | 'year' | 'none';
 
 // 四象限分类（重要性和紧急程度）
-export interface TaskPriority {
-  important: boolean; // 重要性
-  urgent: boolean;    // 紧急程度
-}
+export type TaskPriority = 'high' | 'medium' | 'low';
 
 // 任务类型定义
 export interface Task {
   id: string;
   title: string;
-  completed: boolean;
+  status: TaskStatus;
   timePeriod: TimePeriod;
-  priority: TaskPriority;
-  createdAt: Date;
-  updatedAt?: Date;
-  // 时间周期相关属性
-  dueDate?: Date;
+  // priority: TaskPriority;
+  // 后端返回的重要性和紧急性数值
+  importance?: number;
+  urgency?: number;
+  createdAt: string;
+  updatedAt?: string;
   description?: string;
+}
+
+export const getPriority = ({importance=1, urgency=1}): TaskPriority => {
+  if (importance >= 3 && urgency >= 3) {
+    return 'high';
+  } else if (importance <= 2 && urgency <= 2) {
+    return 'low';
+  } else {
+    return 'medium';
+  }
 }
 
 // 创建并导出任务状态管理store
 export const useTodoStore = defineStore('todo', () => {
   // 任务列表状态
   const tasks = ref<Task[]>([]);
+  // 任务ID映射表 （用于快速查找任务和去重）
+  const tasksMap = ref<Record<string, Task>>({});
   // 加载状态
   const isLoading = ref(false);
   // 错误信息
   const error = ref<string | null>(null);
   
+  const resetTasksHandle = () => {
+    tasks.value = [];
+    tasksMap.value = {};
+  }
+  const addTaskHandle = (task: Task) => {
+    if (!tasksMap.value[task.id]) {
+      const newTask = {
+        ...task,
+        createdAt: dayjs(task.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+        updatedAt: dayjs(task.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+      };
+      tasksMap.value[task.id] = newTask;
+      tasks.value.push(newTask);
+    }
+  }
+
   // 从API加载任务数据
-  const loadTasks = async () => {
+  const loadTasks = async (reset=false) => {
     isLoading.value = true;
     error.value = null;
+    if (reset) {
+      resetTasksHandle();
+    }
     
     try {
       const fetchedTasks = await getAllTasks();
-      tasks.value = fetchedTasks.map(task => {
-        return {
-          ...task,
-          // 安全地转换日期字符串为Date对象
-          createdAt: task.createdAt ? new Date(task.createdAt) : new Date(),
-          updatedAt: task.updatedAt ? new Date(task.updatedAt) : undefined,
-          dueDate: task.dueDate ? new Date(task.dueDate) : undefined
-        };
+      fetchedTasks.data.forEach(task => {
+        addTaskHandle(task);
       });
+      return tasks.value;
     } catch (err: any) {
       error.value = err.message || '加载任务失败';
       Taro.showToast({
@@ -66,13 +93,30 @@ export const useTodoStore = defineStore('todo', () => {
         icon: 'none',
         duration: 2000
       });
+      return [];
     } finally {
       isLoading.value = false;
     }
   };
+
+  const getTaskDetail = async (id: string) => {
+    try {
+      const task = await getTaskById(id);
+      if (task) {
+        return task
+      }
+      throw new Error('任务不存在');
+    } catch (error: any) {
+      Taro.showToast({
+        title: error.message || '获取任务详情失败',
+        icon: 'none',
+        duration: 2000
+      });
+    }
+  };
   
   // 添加新任务
-  const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
     // 输入验证
     if (!taskData.title || taskData.title.trim().length === 0) {
       const errorMsg = '任务标题不能为空';
@@ -85,27 +129,45 @@ export const useTodoStore = defineStore('todo', () => {
     }
     
     try {
+      const importance = taskData.importance || 1;
+      const urgency = taskData.urgency || 1;
+      const priority = getPriority({importance, urgency});
       const newTask = await createTask({
         title: taskData.title.trim(),
-        completed: Boolean(taskData.completed),
+        // completed: Boolean(taskData.completed),
         timePeriod: taskData.timePeriod || 'none',
-        priority: taskData.priority || { important: false, urgent: false },
-        dueDate: taskData.dueDate,
+        // priority,
+        importance,
+        urgency,
         description: taskData.description
       });
+      
       
       // 转换日期格式
       const formattedTask = {
         ...newTask,
-        createdAt: new Date(newTask.createdAt),
-        updatedAt: newTask.updatedAt ? new Date(newTask.updatedAt) : undefined,
-        dueDate: newTask.dueDate ? new Date(newTask.dueDate) : undefined
+        // 转换优先级为四象限格式
+        priority,
+        importance,
+        urgency,
+        createdAt: dayjs(newTask.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+        updatedAt: dayjs(newTask.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
       };
       
-      tasks.value.push(formattedTask);
+      // tasks.value.push(formattedTask);
+
+      Taro.showToast({
+        title: '任务创建成功',
+        icon: 'success',
+        duration: 1500
+      });
+
       return formattedTask;
     } catch (err: any) {
-      const errorMsg = err.message || '创建任务失败';
+      let errorMsg = err.message || '创建任务失败';
+      if (err.code === 409) {
+        errorMsg = '任务标题已存在，请选择其他标题';
+      }
       Taro.showToast({
         title: errorMsg,
         icon: 'none',
@@ -116,25 +178,17 @@ export const useTodoStore = defineStore('todo', () => {
   };
   
   // 更新任务状态
-  const toggleTaskStatus = async (taskId: string) => {
+  const toggleTaskStatus = async (taskId: string, status: TaskStatus) => {
     if (!taskId) return;
     
     try {
-      const task = tasks.value.find(t => t.id === taskId);
-      if (!task) {
-        throw new Error('任务不存在');
-      }
-      
-      const updatedTask = await updateTaskStatus(taskId, !task.completed);
+      const updatedTask = await updateTaskStatus(taskId, status);
       
       // 更新本地状态
       const taskIndex = tasks.value.findIndex(t => t.id === taskId);
       if (taskIndex !== -1) {
         tasks.value[taskIndex] = {
           ...updatedTask,
-          createdAt: new Date(updatedTask.createdAt),
-          updatedAt: updatedTask.updatedAt ? new Date(updatedTask.updatedAt) : undefined,
-          dueDate: updatedTask.dueDate ? new Date(updatedTask.dueDate) : undefined
         };
       }
     } catch (err: any) {
@@ -170,9 +224,8 @@ export const useTodoStore = defineStore('todo', () => {
       if (taskIndex !== -1) {
         tasks.value[taskIndex] = {
           ...updatedTask,
-          createdAt: new Date(updatedTask.createdAt),
-          updatedAt: updatedTask.updatedAt ? new Date(updatedTask.updatedAt) : undefined,
-          dueDate: updatedTask.dueDate ? new Date(updatedTask.dueDate) : undefined
+          createdAt: dayjs(updatedTask.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+          updatedAt: dayjs(updatedTask.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
         };
       }
     } catch (err: any) {
@@ -213,13 +266,13 @@ export const useTodoStore = defineStore('todo', () => {
   const clearCompletedTasks = async () => {
     try {
       // 获取所有已完成任务的ID
-      const completedTaskIds = tasks.value.filter(task => task.completed).map(task => task.id);
+      const completedTaskIds = tasks.value.filter(task => task.status === TaskStatus.Completed).map(task => task.id);
       
       // 批量删除已完成任务
       await Promise.all(completedTaskIds.map(id => apiDeleteTask(id)));
       
       // 更新本地状态
-      tasks.value = tasks.value.filter(task => !task.completed);
+      tasks.value = tasks.value.filter(task => task.status !== TaskStatus.Completed);
     } catch (err: any) {
       const errorMsg = err.message || '清空已完成任务失败';
       Taro.showToast({
@@ -232,12 +285,12 @@ export const useTodoStore = defineStore('todo', () => {
   
   // 计算属性：获取已完成任务数
   const completedTasksCount = computed(() => {
-    return tasks.value.filter(task => task.completed).length;
+    return tasks.value.filter(task => task.status === TaskStatus.Completed).length;
   });
   
   // 计算属性：获取待办任务数
   const pendingTasksCount = computed(() => {
-    return tasks.value.filter(task => !task.completed).length;
+    return tasks.value.filter(task => task.status === TaskStatus.Pending).length;
   });
   
   // 计算属性：任务总数
@@ -256,14 +309,18 @@ export const useTodoStore = defineStore('todo', () => {
   
   // 从API按时间周期获取任务
   const fetchTasksByTimePeriod = async (period: TimePeriod): Promise<Task[]> => {
+    resetTasksHandle();
     try {
       const fetchedTasks = await apiGetTasksByTimePeriod(period);
-      return fetchedTasks.map(task => ({
-        ...task,
-        createdAt: new Date(task.createdAt),
-        updatedAt: task.updatedAt ? new Date(task.updatedAt) : undefined,
-        dueDate: task.dueDate ? new Date(task.dueDate) : undefined
-      }));
+      fetchedTasks.forEach(task => {
+        addTaskHandle(task);
+        return {
+          ...task,
+          createdAt: dayjs(task.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+          updatedAt: dayjs(task.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+        };
+      });
+      return tasks.value;
     } catch (err: any) {
       const errorMsg = err.message || '获取任务列表失败';
       Taro.showToast({
@@ -277,17 +334,20 @@ export const useTodoStore = defineStore('todo', () => {
   
   // 从API获取四象限任务
   const fetchTasksByQuadrant = async () => {
+    resetTasksHandle();
     try {
       const quadrantTasks = await apiGetTasksByQuadrant();
       
-      // 转换日期格式
+      // 转换日期和优先级格式
       const formatTasks = (taskList: any[]) => {
-        return taskList.map(task => ({
-          ...task,
-          createdAt: new Date(task.createdAt),
-          updatedAt: task.updatedAt ? new Date(task.updatedAt) : undefined,
-          dueDate: task.dueDate ? new Date(task.dueDate) : undefined
-        }));
+        return taskList.map(task => {
+          addTaskHandle(task);
+          return {
+            ...task,
+            createdAt: dayjs(task.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+            updatedAt: dayjs(task.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+          };
+        });
       };
       
       return {
@@ -330,22 +390,22 @@ export const useTodoStore = defineStore('todo', () => {
   // 按四象限获取任务（本地筛选）
   // 第一象限：重要且紧急
   const getFirstQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => task.priority.important && task.priority.urgent);
+    return tasks.value.filter(task => task.importance && task.urgency);
   };
   
   // 第二象限：重要不紧急
   const getSecondQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => task.priority.important && !task.priority.urgent);
+    return tasks.value.filter(task => task.importance && !task.urgency);
   };
   
   // 第三象限：不重要但紧急
   const getThirdQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => !task.priority.important && task.priority.urgent);
+    return tasks.value.filter(task => !task.importance && task.urgency);
   };
   
   // 第四象限：不重要不紧急
   const getFourthQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => !task.priority.important && !task.priority.urgent);
+    return tasks.value.filter(task => !task.importance && !task.urgency);
   };
   
   // 获取所有四象限任务（本地筛选）
@@ -364,6 +424,7 @@ export const useTodoStore = defineStore('todo', () => {
     isLoading,
     error,
     loadTasks,
+    getTaskDetail,
     addTask,
     toggleTaskStatus,
     updateTask,

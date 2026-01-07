@@ -17,7 +17,8 @@
     "useCompilerPlugins": [
       "typescript",
       "sass"
-    ]
+    ],
+    "bigPackageSizeSupport": true
   },
   "compileType": "miniprogram"
 }

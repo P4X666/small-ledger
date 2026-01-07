@@ -18,6 +18,7 @@ interface RequestOptions extends Taro.request.Option {
   loadingMask?: boolean;
 }
 
+let loading = false;
 /**
  * Taro.request Promise封装
  * @param options Taro.request的所有配置参数
@@ -47,7 +48,8 @@ export const request = (options: RequestOptions): Promise<any> => {
   }
 
   // 显示加载状态
-  if (showLoading) {
+  if (showLoading && !loading) {
+    loading = true;
     Taro.showLoading({
       title: loadingTitle || '加载中...',
       mask: loadingMask ?? true
@@ -106,7 +108,8 @@ export const request = (options: RequestOptions): Promise<any> => {
       // 完成回调（无论成功或失败都会执行）
       complete: () => {
         // 隐藏加载状态
-        if (showLoading) {
+        if (showLoading && loading) {
+          loading = false;
           Taro.hideLoading();
         }
       }

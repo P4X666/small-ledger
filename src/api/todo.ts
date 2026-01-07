@@ -1,5 +1,6 @@
+import type { TaskStatus } from '@/constants/common';
 import { get, post, put, del } from '../utils/request';
-import type { Task, TaskPriority, TimePeriod } from '@/store/todo';
+import type { Task, TimePeriod } from '@/store/todo';
 
 // API响应数据类型
 interface ApiResponse<T> {
@@ -19,9 +20,9 @@ interface RequestResponse<T> {
 // 创建任务请求参数
 interface CreateTaskParams {
   title: string;
-  completed?: boolean;
   timePeriod: TimePeriod;
-  priority: TaskPriority;
+  importance: number;
+  urgency: number;
   dueDate?: Date;
   description?: string;
 }
@@ -29,19 +30,27 @@ interface CreateTaskParams {
 // 更新任务请求参数
 type UpdateTaskParams = Partial<CreateTaskParams>;
 
-
-
+interface TaskListResponse {
+  data: Task[];
+  links: {
+    first: string;
+    last: string;
+    current: string;
+    prev: string | null;
+    next: string | null;
+  };
+}
 /**
  * 获取所有任务
  * @returns 任务列表
  */
-export const getAllTasks = async (): Promise<Task[]> => {
+export const getAllTasks = async (): Promise<TaskListResponse> => {
   try {
     const response = await get('/api/tasks', {}, {
       showLoading: true,
       loadingTitle: '加载任务中...'
     });
-    return (response as RequestResponse<Task[]>).data.data;
+    return (response as RequestResponse<TaskListResponse>).data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取任务列表失败');
   }
@@ -77,7 +86,7 @@ export const createTask = async (params: CreateTaskParams): Promise<Task> => {
     });
     return (response as RequestResponse<Task>).data.data;
   } catch (error: any) {
-    throw new Error(error.message || '创建任务失败');
+    throw error;
   }
 };
 
@@ -95,19 +104,19 @@ export const updateTask = async (id: string, params: UpdateTaskParams): Promise<
     });
     return (response as RequestResponse<Task>).data.data;
   } catch (error: any) {
-    throw new Error(error.message || '更新任务失败');
+    throw error;
   }
 };
 
 /**
  * 更新任务状态
  * @param id 任务ID
- * @param completed 任务状态
+ * @param status 任务状态
  * @returns 更新后的任务
  */
-export const updateTaskStatus = async (id: string, completed: boolean): Promise<Task> => {
+export const updateTaskStatus = async (id: string, status: TaskStatus): Promise<Task> => {
   try {
-    const response = await put(`/api/tasks/${id}/status`, { completed }, {
+    const response = await put(`/api/tasks/${id}/status`, { status }, {
       showLoading: true,
       loadingTitle: '更新任务状态中...'
     });

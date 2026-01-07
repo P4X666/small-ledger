@@ -9,7 +9,7 @@
     
     <!-- 新建任务按钮 -->
     <view class="add-task-section">
-      <button class="add-task-btn" @click="navigateTo('/pages/todolist/create/index')">
+      <button class="add-task-btn" @click="navigateTo('/pages/todolist/detail/index')">
         <text class="add-icon">+</text>
         <text class="add-text">新建任务</text>
       </button>
@@ -22,52 +22,80 @@
         <text class="view-all" @click="navigateTo('/pages/todolist/index')">查看全部</text>
       </view>
       
-      <view class="tasks-list" v-if="importantPendingTasks && importantPendingTasks.length > 0">
-        <view class="task-item" v-for="task in displayTasks" :key="task.id">
-          <nut-swipe>
-            <template #left>
-              <nut-button shape="square" style="height: 100%" type="danger">放弃</nut-button>
-            </template>
-            <nut-cell :title="task.title" center>
-              <template #link>
-                <view class="task-desc" @click="navigateTo(`/pages/todolist/edit/index?id=${task.id}`)">
-                  <text v-if="task.priority?.important && task.priority?.urgent" class="priority-badge important-urgent">重要紧急</text>
-                  <text v-else-if="task.priority?.important" class="priority-badge important">重要</text>
-                  <text v-else-if="task.priority?.urgent" class="priority-badge urgent">紧急</text>
-                  <view class="task-arrow">
-                    <text>›</text>
-                  </view>
-                </view>
-              </template>
-            </nut-cell>
-            <template #right>
-              <nut-button shape="square" style="height: 100%" type="success">完成</nut-button>
-            </template>
-          </nut-swipe>
-        </view>
-        
-        <!-- 显示更多任务 -->
-        <view v-if="importantPendingTasks.length > 5" class="show-more">
-          <text class="show-more-text" @click="showAllTasks = !showAllTasks">
-            {{ showAllTasks ? '收起' : `还有 ${importantPendingTasks.length - 5} 个任务` }}
-          </text>
-        </view>
+      <!-- 加载状态 -->
+      <view v-if="isLoading" class="loading-container">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载任务中...</text>
       </view>
       
-      <view v-else class="no-tasks">
-        <text>暂无重要任务，点击上方按钮创建新任务吧</text>
+      <!-- 错误状态 -->
+      <view v-else-if="loadError" class="error-container">
+        <text class="error-text">加载任务失败</text>
+        <button class="retry-btn" @click="retryLoad">重试</button>
+      </view>
+      
+      <!-- 任务列表和空状态 -->
+      <view v-else>
+        <view class="tasks-list" v-if="importantPendingTasks && importantPendingTasks.length > 0">
+          <view class="task-item" v-for="task in displayTasks" :key="task.id">
+            <nut-swipe>
+              <template #left>
+                <nut-button shape="square" style="height: 100%" type="danger" @click="toggleTaskStatus(task.id, TaskStatus.Pending)">放弃</nut-button>
+              </template>
+              <nut-cell :title="task.title" center>
+                <template #link>
+                  <view class="task-desc" @click="navigateTo(`/pages/todolist/detail/index?id=${task.id}`)">
+                    <text v-if="task.importance === 4 && task.urgency === 4" class="priority-badge important-urgent">重要紧急</text>
+                    <text v-else-if="task.importance === 4" class="priority-badge important">重要</text>
+                    <text v-else-if="task.urgency === 4" class="priority-badge urgent">紧急</text>
+                    <view class="task-arrow">
+                      <text>›</text>
+                    </view>
+                  </view>
+                </template>
+              </nut-cell>
+              <template #right>
+                <nut-button shape="square" style="height: 100%" type="success" @click="toggleTaskStatus(task.id, TaskStatus.Completed)">完成</nut-button>
+              </template>
+            </nut-swipe>
+          </view>
+          
+          <!-- 显示更多任务 -->
+          <view v-if="importantPendingTasks.length > 5" class="show-more">
+            <text class="show-more-text" @click="showAllTasks = !showAllTasks">
+              {{ showAllTasks ? '收起' : `还有 ${importantPendingTasks.length - 5} 个任务` }}
+            </text>
+          </view>
+        </view>
+        
+        <!-- 空状态 -->
+        <view v-else class="no-tasks">
+          <text>暂无重要任务，点击上方按钮创建新任务吧</text>
+        </view>
       </view>
     </view>
     
     <!-- 任务统计概览 -->
-    <view class="task-stats">
+    <view class="task-stats" v-if="!isLoading && !loadError">
       <view class="stat-box">
-        <text class="stat-number">{{ importantPendingTasks.filter(task => !task.completed).length }}</text>
+        <text class="stat-number">{{ importantPendingTasks.filter(task => task.status !== TaskStatus.Completed).length }}</text>
         <text class="stat-label">待完成任务</text>
       </view>
       <view class="stat-box">
         <text class="stat-number">{{ firstQuadrantTasksCount }}</text>
         <text class="stat-label">重要紧急任务</text>
+      </view>
+    </view>
+    
+    <!-- 统计概览加载占位符 -->
+    <view class="task-stats" v-else>
+      <view class="stat-box placeholder">
+        <text class="stat-number"></text>
+        <text class="stat-label"></text>
+      </view>
+      <view class="stat-box placeholder">
+        <text class="stat-number"></text>
+        <text class="stat-label"></text>
       </view>
     </view>
     
@@ -98,29 +126,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import Taro, { useDidShow } from '@tarojs/taro';
-import { updateTabbarSelectedIndex } from '@/utils/common';
+import { ref, computed } from 'vue';
+import Taro, { useDidHide, useDidShow } from '@tarojs/taro';
+import { getGreetingMessage } from '@/utils/common';
 import { useNavigationBar } from '@/utils/navigation';
 import { TAB_PAGE } from '@/constants/tab-page';
+import { useTodoStore, type Task } from '@/store/todo';
 import './index.scss'
+import { TaskStatus } from '@/constants/common';
+import { getTabBarInstance } from '@/utils/tab-bar';
 
 // 使用顶部栏高度管理组合式函数
 const { navigationBarHeight } = useNavigationBar();
 
 // 状态管理
 const showAllTasks = ref(false);
+const isLoading = ref(true);
+const loadError = ref(false);
+const importantPendingTasks = ref<Task[]>([]);
+const todoStore = useTodoStore();
 
 // 获取问候语
 const greetingMessage = computed(() => {
-  const hour = new Date().getHours();
-  if (hour < 6) return '夜深了，注意休息';
-  if (hour < 9) return '早上好，开始新的一天';
-  if (hour < 12) return '上午好，效率满满';
-  if (hour < 14) return '中午好，记得午休';
-  if (hour < 18) return '下午好，继续加油';
-  if (hour < 22) return '晚上好，放松一下';
-  return '夜深了，准备休息';
+  return getGreetingMessage();
 });
 
 // 格式化日期
@@ -131,46 +159,6 @@ const formatDate = computed(() => {
   const day = date.getDate();
   return `${year}年${month}月${day}日`;
 });
-
-// 模拟重要待办任务数据
-const importantPendingTasks = ref([
-  {
-    id: '1',
-    title: '完成项目规划报告',
-    priority: { important: true, urgent: true },
-    completed: false
-  },
-  {
-    id: '2',
-    title: '准备团队会议演示文稿',
-    priority: { important: true, urgent: false },
-    completed: false
-  },
-  {
-    id: '3',
-    title: '回复重要客户邮件',
-    priority: { important: false, urgent: true },
-    completed: false
-  },
-  {
-    id: '4',
-    title: '整理月度工作报告',
-    priority: { important: true, urgent: true },
-    completed: false
-  },
-  {
-    id: '5',
-    title: '与设计团队讨论界面原型',
-    priority: { important: true, urgent: false },
-    completed: false
-  },
-  {
-    id: '6',
-    title: '更新项目进度表',
-    priority: { important: true, urgent: true },
-    completed: false
-  }
-]);
 
 // 显示的任务数量
 // 增强displayTasks计算属性，添加防御性检查
@@ -192,31 +180,40 @@ const firstQuadrantTasksCount = computed(() => {
   }
   
   return importantPendingTasks.value.filter(task => 
-    task && task.priority?.important && task.priority?.urgent && !task.completed
+    task && task.importance === 4 && task.urgency === 4 && task.status !== TaskStatus.Completed
   ).length;
 });
 
-// 增强toggleTaskStatus函数，添加参数检查
-const toggleTaskStatus = (taskId) => {
-  if (!taskId) {
-    console.error('任务ID不能为空');
-    return;
-  }
+// 加载任务数据
+const loadTasks = async () => {
+  isLoading.value = true;
+  loadError.value = false;
   
-  if (!importantPendingTasks.value || !Array.isArray(importantPendingTasks.value)) {
-    console.error('任务列表未初始化');
-    return;
+  try {
+    const allImportantTasks = await todoStore.loadTasks(true);
+    importantPendingTasks.value = allImportantTasks.filter(task => task?.status === TaskStatus.InProgress);
+  } catch (error: any) {
+    console.error('加载任务失败:', error);
+  } finally {
+    isLoading.value = false;
   }
+};
+
+// 切换任务状态
+const toggleTaskStatus = async (taskId: string, status: TaskStatus) => {
   
-  const task = importantPendingTasks.value.find(t => t.id === taskId);
-  if (task) {
-    task.completed = !task.completed;
+  try {
+    await todoStore.toggleTaskStatus(taskId, status);
+    
+    // 重新加载任务数据
+    await loadTasks();
+    
     Taro.showToast({
-      title: task.completed ? '任务已完成' : '任务已恢复',
+      title: status === TaskStatus.Completed ? '任务已完成' : '任务已取消',
       icon: 'none'
     });
-  } else {
-    console.error('未找到指定任务');
+  } catch (error: any) {
+    console.error('更新任务状态失败:', error);
   }
 };
 
@@ -227,17 +224,20 @@ const navigateTo = (url: string) => {
     console.error('导航URL不能为空');
     return;
   }
+  console.log('导航到:', url);
   const handleTabClick = TAB_PAGE[url]?Taro.switchTab:Taro.navigateTo;
   handleTabClick({url});
 };
 
-// 页面加载时的初始化
-onMounted(() => {
-  // 这里可以从store获取真实数据
-});
+// 重试加载数据
+const retryLoad = () => {
+  loadTasks();
+};
 
-// 页面显示时更新底部栏高亮状态
+// 页面显示时更新底部栏高亮状态并刷新数据
 useDidShow(() => {
-  updateTabbarSelectedIndex(0);
+  const tabBar = getTabBarInstance();
+  tabBar.updateTabbarSelectedIndex(0);
+  loadTasks();
 });
 </script>

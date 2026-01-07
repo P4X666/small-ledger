@@ -1,5 +1,5 @@
 <template>
-  <view class="custom-tab-bar safe-area">
+  <view class="custom-tab-bar safe-area" :style="{ height: tabBarHeight }">
     <view 
       class="tab-item" 
       v-for="(item, index) in tabList" 
@@ -24,6 +24,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import Taro from '@tarojs/taro';
+import type { TabBarExposed } from '@/utils/tab-bar';
 import './index.scss';
 
 // 定义底部栏项接口
@@ -64,6 +65,7 @@ const tabList: TabItem[] = [
 
 // 当前选中的索引
 const selected = ref(0);
+const tabBarHeight = '100rpx';
 
 // 更新选中的索引
 const updateSelectedIndex = (index = 0) => {
@@ -81,6 +83,7 @@ const switchTab = (url: string) => {
 
 defineExpose({
   updateTabbarSelectedIndex: updateSelectedIndex,
-});
+  tabBarHeight,
+} as TabBarExposed);
 
 </script>

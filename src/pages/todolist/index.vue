@@ -1,8 +1,17 @@
 <template>
-  <view class="container" :style="{ paddingTop: navigationBarHeight + 'px' }">
-    <view class="header">
+  <nut-navbar 
+    title="任务管理" 
+    fixed 
+    placeholder 
+    safe-area-inset-top 
+    z-index="999"
+    class="custom-navbar"
+    :style="{ '--status-bar-height': statusBarHeight + 'px' }"
+  ></nut-navbar>
+  <view class="container">
+    <!-- <view class="header">
       <text class="title">任务管理</text>
-    </view>
+    </view> -->
 
     <!-- 视图切换器 -->
     <view class="view-switcher">
@@ -59,30 +68,30 @@
       </view>
 
       <!-- 任务列表 -->
-      <view class="task-list">
+      <view class="task-list" :style="{ paddingBottom: tabBarHeight }">
         <view v-if="filteredTasks.length === 0" class="empty-state">
           <nut-icon name="task-list" size="48" color="#e0e0e0" />
           <text>暂无任务，快来创建第一个任务吧！</text>
         </view>
         <view v-for="task in filteredTasks" :key="task.id" class="task-item">
           <view class="task-content">
-            <view :class="['checkbox-container', { completed: task.completed }]" @click="toggleTaskStatus(task.id)">
-              <nut-icon :name="task.completed ? 'check-circle' : 'circle'" :size="24"
-                :color="task.completed ? 'var(--primary-color)' : '#d9d9d9'" />
+            <view :class="['checkbox-container', { completed: task.status === TaskStatus.Completed }]" @click="toggleTaskStatus(task.id, task.status === TaskStatus.Completed ? TaskStatus.Pending : TaskStatus.Completed)">
+              <CheckChecked v-if="task.status === TaskStatus.Completed" :size="24" color="var(--primary-color)" />
+              <Check v-else :size="24" color="#d9d9d9" />
             </view>
             <view class="task-main">
-              <text :class="{ 'completed': task.completed }" class="task-title">{{ task.title }}</text>
+              <text :class="{ 'completed': task.status === TaskStatus.Completed }" class="task-title">{{ task.title }}</text>
               <view class="task-meta">
                 <view class="period-tag" :class="`period-${task.timePeriod}`">
                   <nut-icon name="calendar" size="12" color="#fff" />
                   <text>{{ getPeriodLabel(task.timePeriod) }}</text>
                 </view>
                 <view class="priority-tags">
-                  <view v-if="task.priority.important" class="important-tag">
+                  <view v-if="task.importance===4" class="important-tag">
                     <nut-icon name="star" size="12" color="#fff" />
                     <text>重要</text>
                   </view>
-                  <view v-if="task.priority.urgent" class="urgent-tag">
+                  <view v-if="task.urgency===4" class="urgent-tag">
                     <nut-icon name="clock" size="12" color="#fff" />
                     <text>紧急</text>
                   </view>
@@ -92,13 +101,14 @@
           </view>
           <view class="task-actions">
             <nut-button @tap="editTask(task)" class="edit-btn">
-              <nut-icon name="edit" size="16" color="var(--primary-color)" />
+              <Edit size="16" color="var(--primary-color)" />
             </nut-button>
             <nut-button @tap="deleteTask(task.id)" class="delete-btn">
-              <nut-icon name="delete" size="16" color="var(--danger-color)" />
+              <Del size="16" color="var(--danger-color)" />
             </nut-button>
           </view>
         </view>
+        <ListLoading :isEnd="isEnd" />
       </view>
     </view>
 
@@ -202,11 +212,15 @@
 import { ref, computed, onMounted, Ref } from 'vue';
 import { useTodoStore, type TimePeriod } from '@/store/todo';
 import Taro, { useDidShow } from '@tarojs/taro';
-import { updateTabbarSelectedIndex } from '@/utils/common';
+import { Edit, Del, Check, CheckChecked } from '@nutui/icons-vue-taro';
+import { TaskStatus } from '@/constants/common';
+import { getTabBarInstance } from '@/utils/tab-bar';
 import { useNavigationBar } from '@/utils/navigation';
+import ListLoading from '@/components/list-loading/index.vue';
 import './index.scss'
 
-const { navigationBarHeight } = useNavigationBar();
+const { statusBarHeight } = useNavigationBar();
+
 // 初始化store
 const todoStore = useTodoStore();
 
@@ -217,8 +231,6 @@ const timePeriods: Ref<{ label: string; value: TimePeriod }[]> = ref([
   { label: '本月', value: 'month' },
   { label: '本年', value: 'year' }
 ]);
-
-const timePeriodOptions = computed(() => timePeriods.value.map(p => p.label));
 
 // 响应式数据
 const viewMode = ref<'list' | 'quadrant'>('list');
@@ -231,6 +243,8 @@ const editingTask = ref<any>(null);
 const editingTaskPeriodIndex = ref(0);
 const editingTaskImportant = ref(false);
 const editingTaskUrgent = ref(false);
+// 列表加载状态
+const isEnd = ref(false);
 
 // 计算属性：根据当前选择的时间周期过滤任务
 const filteredTasks = computed(() => {
@@ -259,9 +273,13 @@ const loadTasks = async () => {
   }
 };
 
+const tabBarHeight = ref('60rpx');
+
 // 页面显示时更新底部栏高亮状态
 useDidShow(() => {
-  updateTabbarSelectedIndex(1);
+  const tabBar = getTabBarInstance();
+  tabBar.updateTabbarSelectedIndex(1);
+  tabBarHeight.value = tabBar.tabBarHeight;
 }); 
 // 切换视图模式
 const switchViewMode = (mode: 'list' | 'quadrant') => {
@@ -296,14 +314,6 @@ const handleUrgentChange = (event: any) => {
   newTaskUrgent.value = event.detail.value;
 };
 
-const handleEditingImportantChange = (event: any) => {
-  editingTaskImportant.value = event.detail.value;
-};
-
-const handleEditingUrgentChange = (event: any) => {
-  editingTaskUrgent.value = event.detail.value;
-};
-
 // 添加新任务
 const addTask = () => {
   Taro.navigateTo({
@@ -312,9 +322,9 @@ const addTask = () => {
 };
 
 // 切换任务状态
-const toggleTaskStatus = async (id: string) => {
+const toggleTaskStatus = async (id: string, status: TaskStatus) => {
   try {
-    await todoStore.toggleTaskStatus(id);
+    await todoStore.toggleTaskStatus(id, status);
   } catch (error) {
     console.error('切换任务状态失败:', error);
   }
@@ -341,10 +351,8 @@ const saveEditedTask = async () => {
       await todoStore.updateTask(editingTask.value.id, {
         title: editingTask.value.title.trim(),
         timePeriod: selectedPeriod,
-        priority: {
-          important: editingTaskImportant.value,
-          urgent: editingTaskUrgent.value
-        }
+        importance: editingTask.value.importance,
+        urgency: editingTask.value.urgency,
       });
 
       editingTask.value = null;

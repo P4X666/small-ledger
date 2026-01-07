@@ -23,13 +23,11 @@ export const useNavigationBar = () => {
   // 获取导航栏高度信息
   const getNavigationBarInfo = () => {
     try {
-      // 获取系统信息
-      const systemInfo = Taro.getSystemInfoSync();
       // 获取胶囊按钮位置信息
       const menuButton = Taro.getMenuButtonBoundingClientRect();
       
       // 状态栏高度
-      statusBarHeight.value = systemInfo.statusBarHeight!;
+      statusBarHeight.value = Taro.getWindowInfo().statusBarHeight!;
       // 胶囊按钮信息
       menuButtonInfo.value = menuButton;
       
