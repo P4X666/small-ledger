@@ -9,7 +9,8 @@ import {
   updateTaskStatus, 
   deleteTask as apiDeleteTask,
   getTasksByTimePeriod as apiGetTasksByTimePeriod,
-  getTasksByQuadrant as apiGetTasksByQuadrant
+  getTasksByQuadrant as apiGetTasksByQuadrant,
+  getTasksNum
 } from '@/api/todo';
 import { TaskStatus } from '@/constants/common';
 import dayjs from 'dayjs';
@@ -98,6 +99,41 @@ export const useTodoStore = defineStore('todo', () => {
       isLoading.value = false;
     }
   };
+
+  const loadTasksForHome = async (reset = false)=>{
+    isLoading.value = true;
+    error.value = null;
+    if (reset) {
+      resetTasksHandle();
+    }
+    
+    try {
+      const fetchedTasks = await getAllTasks({
+        page:1,
+        limit:10
+      });
+      return fetchedTasks.data;
+    } catch (err: any) {
+      error.value = err.message || '加载任务失败';
+      Taro.showToast({
+        title: error.value || '加载任务失败',
+        icon: 'none',
+        duration: 2000
+      });
+      return [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  const getTasksStatistics = async ()=>{
+    try {
+      const task = await getTasksNum();
+      return task
+    } catch (error: any) {
+      console.error(error);
+      return {allTasksTotal: 0, highPriorityTasksTotal:0, inProgressTasksTotal:0}
+    }
+  }
 
   const getTaskDetail = async (id: string) => {
     try {
@@ -424,6 +460,8 @@ export const useTodoStore = defineStore('todo', () => {
     isLoading,
     error,
     loadTasks,
+    loadTasksForHome,
+    getTasksStatistics,
     getTaskDetail,
     addTask,
     toggleTaskStatus,

@@ -30,27 +30,59 @@ interface CreateTaskParams {
 // 更新任务请求参数
 type UpdateTaskParams = Partial<CreateTaskParams>;
 
+interface TaskListParams {
+  limit?: number;
+  page?: number;
+}
+
 interface TaskListResponse {
   data: Task[];
   links: {
-    first: string;
-    last: string;
+    first?: string;
+    last?: string;
     current: string;
-    prev: string | null;
-    next: string | null;
+    prev?: string | null;
+    next?: string | null;
   };
+  meta: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+  }
 }
 /**
  * 获取所有任务
  * @returns 任务列表
  */
-export const getAllTasks = async (): Promise<TaskListResponse> => {
+export const getAllTasks = async (params={} as TaskListParams): Promise<TaskListResponse> => {
   try {
-    const response = await get('/api/tasks', {}, {
+    const response = await get('/api/tasks', params, {
       showLoading: true,
       loadingTitle: '加载任务中...'
     });
     return (response as RequestResponse<TaskListResponse>).data.data;
+  } catch (error: any) {
+    throw new Error(error.message || '获取任务列表失败');
+  }
+};
+
+interface TasksStatistics {
+  allTasksTotal: number;
+  inProgressTasksTotal: number;
+  highPriorityTasksTotal: number;
+}
+/**
+ * 获取所有任务统计
+ * @returns {}
+ */
+export const getTasksNum = async (): Promise<TasksStatistics> => {
+  try {
+    const response = await get('/api/tasks/getTasksNum', {}, {
+      showLoading: true,
+      loadingTitle: '加载任务中...'
+    });
+    return (response as RequestResponse<TasksStatistics>).data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取任务列表失败');
   }

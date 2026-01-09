@@ -1,6 +1,6 @@
 {
   "miniprogramRoot": "./dist",
-  "projectname": "small ledger",
+  "projectname": "small_ledger",
   "description": "家有小账本",
   "appid": "wx8748553a65c9a0b4",
   "setting": {

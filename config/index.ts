@@ -15,7 +15,7 @@ export default defineConfig(async (merge, { command, mode }) => {
     date: '2025-10-24',
     designWidth (input) {
       // 配置 NutUI 375 尺寸
-      if (input?.file?.replace(/\\+/g, '/').indexOf('@nutui') > -1) {
+      if ((input as any)?.file?.replace(/\\+/g, '/').indexOf('@nutui') > -1) {
         return 375
       }
       // 全局使用 Taro 默认的 750 尺寸
@@ -32,7 +32,7 @@ export default defineConfig(async (merge, { command, mode }) => {
     plugins: ['@tarojs/plugin-html'],
     // 配置全局 Scss 变量
     sass: {
-      data: `@import "@nutui/nutui-taro/dist/styles/variables.scss";`,
+      data: `@use "@nutui/nutui-taro/dist/styles/variables.scss";`,
     },
     copy: {
       patterns: [
