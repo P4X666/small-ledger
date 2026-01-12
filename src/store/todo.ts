@@ -50,6 +50,7 @@ export const getPriority = ({importance=1, urgency=1}): TaskPriority => {
 export const useTodoStore = defineStore('todo', () => {
   // 任务列表状态
   const tasks = ref<Task[]>([]);
+  const totalTasksCount = ref(0)
   // 任务ID映射表 （用于快速查找任务和去重）
   const tasksMap = ref<Record<string, Task>>({});
   // 加载状态
@@ -86,6 +87,7 @@ export const useTodoStore = defineStore('todo', () => {
       fetchedTasks.data.forEach(task => {
         addTaskHandle(task);
       });
+      totalTasksCount.value = fetchedTasks.meta.totalItems
       return tasks.value;
     } catch (err: any) {
       error.value = err.message || '加载任务失败';
@@ -109,8 +111,8 @@ export const useTodoStore = defineStore('todo', () => {
     
     try {
       const fetchedTasks = await getAllTasks({
-        page:1,
-        limit:10
+        page: 1,
+        limit: 10
       });
       return fetchedTasks.data;
     } catch (err: any) {
@@ -327,11 +329,6 @@ export const useTodoStore = defineStore('todo', () => {
   // 计算属性：获取待办任务数
   const pendingTasksCount = computed(() => {
     return tasks.value.filter(task => task.status === TaskStatus.Pending).length;
-  });
-  
-  // 计算属性：任务总数
-  const totalTasksCount = computed(() => {
-    return tasks.value.length;
   });
   
   // 按时间周期筛选任务（本地筛选）

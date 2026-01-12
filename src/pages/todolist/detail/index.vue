@@ -65,11 +65,9 @@
 
     <view class="footer safe-area">
       <button @tap="goBack" class="cancel-btn">
-        <nut-icon name="close" size="16" color="#666" />
         取消
       </button>
       <button @tap="createTask" class="confirm-btn">
-        <nut-icon name="check" size="16" color="#fff" />
         保存
       </button>
     </view>

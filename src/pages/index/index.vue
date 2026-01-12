@@ -48,9 +48,13 @@
           </view>
           
           <!-- 显示更多任务 -->
-          <view v-if="importantInProgressTasks.length > 5" class="show-more">
-            <text class="show-more-text" @click="showAllTasks = !showAllTasks">
-              {{ showAllTasks ? '收起' : `还有 ${importantInProgressTasks.length - 5} 个任务` }}
+          <view 
+            v-if="importantInProgressTasks.length > 5" 
+            class="show-more" 
+            @click="navigateTo('/pages/todolist/index')"
+          >
+            <text class="show-more-text" >
+              查看全部
             </text>
           </view>
         </view>
@@ -105,7 +109,7 @@ import { ref, computed } from 'vue';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { getGreetingMessage } from '@/utils/common';
 import { useNavigationBar } from '@/utils/navigation';
-import { TAB_PAGE } from '@/constants/tab-page';
+import { TAB_PAGE_REVERSE } from '@/constants/tab-page';
 import { useTodoStore, type Task } from '@/store/todo';
 import { TaskStatus } from '@/constants/common';
 import { getTabBarInstance } from '@/utils/tab-bar';
@@ -114,8 +118,6 @@ import './index.scss'
 // 使用顶部栏高度管理组合式函数
 const { navigationBarHeight } = useNavigationBar();
 
-// 状态管理
-const showAllTasks = ref(false);
 const importantInProgressTasks = ref<Task[]>([]);
 const statistics = ref({inProgressTasksTotal:0, highPriorityTasksTotal: 0})
 const todoStore = useTodoStore();
@@ -140,10 +142,7 @@ const displayTasks = computed(() => {
   if (!importantInProgressTasks.value || !Array.isArray(importantInProgressTasks.value)) {
     return [];
   }
-  
-  if (showAllTasks.value) {
-    return importantInProgressTasks.value;
-  }
+
   return importantInProgressTasks.value.slice(0, 5);
 });
 
@@ -184,7 +183,7 @@ const navigateTo = (url: string) => {
     return;
   }
   console.log('导航到:', url);
-  const handleTabClick = TAB_PAGE[url]?Taro.switchTab:Taro.navigateTo;
+  const handleTabClick = TAB_PAGE_REVERSE[url]?Taro.switchTab:Taro.navigateTo;
   handleTabClick({url});
 };
 
