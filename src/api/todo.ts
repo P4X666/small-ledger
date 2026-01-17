@@ -33,6 +33,9 @@ type UpdateTaskParams = Partial<CreateTaskParams>;
 interface TaskListParams {
   limit?: number;
   page?: number;
+  timePeriod?: TimePeriod;
+  importance?: number;
+  urgency?: number;
 }
 
 interface TaskListResponse {

@@ -117,7 +117,7 @@ const validateForm = () => {
 
   // 验证任务名称
   if (!formData.title.trim()) {
-    showErrorToast('任务名称不能为空');
+    // showErrorToast('任务名称不能为空');
     return false;
   }
 
@@ -129,13 +129,13 @@ const isFormValid = computed(() => {
   return validateForm();
 });
 
-const showErrorToast = (title: string) => {
-  Taro.showToast({
-    title,
-    icon: 'none',
-    duration: 2000
-  });
-};
+// const showErrorToast = (title: string) => {
+//   Taro.showToast({
+//     title,
+//     icon: 'none',
+//     duration: 2000
+//   });
+// };
 
 // 处理时间周期变化
 const handleTimePeriodChange = ({ selectedValue, selectedOptions }: { selectedValue: string, selectedOptions: { text: string, value: TimePeriod }[] }) => {
@@ -222,8 +222,7 @@ const getTaskDetail = async (id: string) => {
           formData[key] = task[key];
         }
       }
-      console.log(formData);
-      
+      formData.id = id;
     }
   } catch (error) {
     goBack();

@@ -148,10 +148,10 @@ const displayTasks = computed(() => {
 
 // 加载任务数据
 const loadTasks = async () => {
-  todoStore.loadTasksForHome(true).then(res=>{
+  todoStore.loadTasksForHome().then(res=>{
     importantInProgressTasks.value = res
   })
-  await todoStore.getTasksStatistics().then(res=>{
+  todoStore.getTasksStatistics().then(res=>{
     const {inProgressTasksTotal = 0, highPriorityTasksTotal = 0} = res
     statistics.value = {inProgressTasksTotal, highPriorityTasksTotal}
   })

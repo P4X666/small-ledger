@@ -55,12 +55,24 @@ export const useTodoStore = defineStore('todo', () => {
   const tasksMap = ref<Record<string, Task>>({});
   // 加载状态
   const isLoading = ref(false);
+
+  const isEnd = ref(false);
+
+  const params = ref({
+    page: 1,
+    limit: 10,
+  })
   // 错误信息
   const error = ref<string | null>(null);
   
   const resetTasksHandle = () => {
     tasks.value = [];
     tasksMap.value = {};
+    params.value = {
+      page: 1,
+      limit: 10,
+    };
+    isEnd.value = false;
   }
   const addTaskHandle = (task: Task) => {
     if (!tasksMap.value[task.id]) {
@@ -75,19 +87,31 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   // 从API加载任务数据
-  const loadTasks = async (reset=false) => {
+  const loadTasks = async (reset=false, customParams={}) => {
+    if (isLoading.value) {
+      return [];
+    }
     isLoading.value = true;
     error.value = null;
     if (reset) {
       resetTasksHandle();
     }
+    if(isEnd.value){
+      return [];
+    }
     
     try {
-      const fetchedTasks = await getAllTasks();
+      const allParams = {
+        ...params.value,
+        ...customParams
+      }
+      const fetchedTasks = await getAllTasks(allParams);
       fetchedTasks.data.forEach(task => {
         addTaskHandle(task);
       });
-      totalTasksCount.value = fetchedTasks.meta.totalItems
+      totalTasksCount.value = fetchedTasks.meta.totalItems;
+      params.value.page++;
+      isEnd.value = params.value.page > fetchedTasks.meta.totalPages;
       return tasks.value;
     } catch (err: any) {
       error.value = err.message || '加载任务失败';
@@ -102,13 +126,7 @@ export const useTodoStore = defineStore('todo', () => {
     }
   };
 
-  const loadTasksForHome = async (reset = false)=>{
-    isLoading.value = true;
-    error.value = null;
-    if (reset) {
-      resetTasksHandle();
-    }
-    
+  const loadTasksForHome = async ()=>{
     try {
       const fetchedTasks = await getAllTasks({
         page: 1,
@@ -116,15 +134,12 @@ export const useTodoStore = defineStore('todo', () => {
       });
       return fetchedTasks.data;
     } catch (err: any) {
-      error.value = err.message || '加载任务失败';
       Taro.showToast({
         title: error.value || '加载任务失败',
         icon: 'none',
         duration: 2000
       });
       return [];
-    } finally {
-      isLoading.value = false;
     }
   }
   const getTasksStatistics = async ()=>{
@@ -321,28 +336,11 @@ export const useTodoStore = defineStore('todo', () => {
     }
   };
   
-  // 计算属性：获取已完成任务数
-  const completedTasksCount = computed(() => {
-    return tasks.value.filter(task => task.status === TaskStatus.Completed).length;
-  });
-  
-  // 计算属性：获取待办任务数
-  const pendingTasksCount = computed(() => {
-    return tasks.value.filter(task => task.status === TaskStatus.Pending).length;
-  });
-  
-  // 按时间周期筛选任务（本地筛选）
-  const getTasksByTimePeriod = (period: TimePeriod): Task[] => {
-    if (!period || period === 'none') {
-      return [...tasks.value];
-    }
-    
-    return tasks.value.filter(task => task.timePeriod === period);
-  };
-  
   // 从API按时间周期获取任务
-  const fetchTasksByTimePeriod = async (period: TimePeriod): Promise<Task[]> => {
-    resetTasksHandle();
+  const fetchTasksByTimePeriod = async (period: TimePeriod, isReset = true): Promise<Task[]> => {
+    if (isReset) {
+      resetTasksHandle();
+    }
     try {
       const fetchedTasks = await apiGetTasksByTimePeriod(period);
       fetchedTasks.forEach(task => {
@@ -366,8 +364,10 @@ export const useTodoStore = defineStore('todo', () => {
   };
   
   // 从API获取四象限任务
-  const fetchTasksByQuadrant = async () => {
-    resetTasksHandle();
+  const fetchTasksByQuadrant = async (isReset = true) => {
+    if (isReset) {
+      resetTasksHandle();
+    }
     try {
       const quadrantTasks = await apiGetTasksByQuadrant();
       
@@ -399,63 +399,13 @@ export const useTodoStore = defineStore('todo', () => {
       throw new Error(errorMsg);
     }
   };
-  
-  // 获取本周任务
-  const getWeeklyTasks = (): Task[] => {
-    return getTasksByTimePeriod('week');
-  };
-  
-  // 获取本月任务
-  const getMonthlyTasks = (): Task[] => {
-    return getTasksByTimePeriod('month');
-  };
-  
-  // 获取本年任务
-  const getYearlyTasks = (): Task[] => {
-    return getTasksByTimePeriod('year');
-  };
-  
-  // 获取无时间限制任务
-  const getNoTimeLimitTasks = (): Task[] => {
-    return getTasksByTimePeriod('none');
-  };
-  
-  // 按四象限获取任务（本地筛选）
-  // 第一象限：重要且紧急
-  const getFirstQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => task.importance && task.urgency);
-  };
-  
-  // 第二象限：重要不紧急
-  const getSecondQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => task.importance && !task.urgency);
-  };
-  
-  // 第三象限：不重要但紧急
-  const getThirdQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => !task.importance && task.urgency);
-  };
-  
-  // 第四象限：不重要不紧急
-  const getFourthQuadrantTasks = (): Task[] => {
-    return tasks.value.filter(task => !task.importance && !task.urgency);
-  };
-  
-  // 获取所有四象限任务（本地筛选）
-  const getAllQuadrantTasks = () => {
-    return {
-      first: getFirstQuadrantTasks(),
-      second: getSecondQuadrantTasks(),
-      third: getThirdQuadrantTasks(),
-      fourth: getFourthQuadrantTasks()
-    };
-  };
-  
+
   // 导出状态和方法
   return {
     tasks,
     isLoading,
     error,
+    isEnd,
     loadTasks,
     loadTasksForHome,
     getTasksStatistics,
@@ -465,20 +415,8 @@ export const useTodoStore = defineStore('todo', () => {
     updateTask,
     deleteTask,
     clearCompletedTasks,
-    completedTasksCount,
-    pendingTasksCount,
     totalTasksCount,
-    getTasksByTimePeriod,
     fetchTasksByTimePeriod,
     fetchTasksByQuadrant,
-    getWeeklyTasks,
-    getMonthlyTasks,
-    getYearlyTasks,
-    getNoTimeLimitTasks,
-    getFirstQuadrantTasks,
-    getSecondQuadrantTasks,
-    getThirdQuadrantTasks,
-    getFourthQuadrantTasks,
-    getAllQuadrantTasks
   };
 });

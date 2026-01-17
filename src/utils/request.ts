@@ -117,6 +117,16 @@ export const request = (options: RequestOptions): Promise<any> => {
   });
 };
 
+const removeUndefined = (obj: any) => {
+  const params = {}
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      params[key] = obj[key];
+    }
+  }
+  return params;
+}
+
 /**
  * GET请求封装
  * @param url 请求URL
@@ -128,7 +138,7 @@ export const get = (url: string, data?: any, options?: Omit<RequestOptions, 'url
   return request({
     url,
     method: 'GET',
-    data,
+    data: removeUndefined(data),
     ...options
   });
 };
@@ -144,7 +154,7 @@ export const post = (url: string, data?: any, options?: Omit<RequestOptions, 'ur
   return request({
     url,
     method: 'POST',
-    data,
+    data: removeUndefined(data),
     ...options
   });
 };
@@ -160,7 +170,7 @@ export const put = (url: string, data?: any, options?: Omit<RequestOptions, 'url
   return request({
     url,
     method: 'PUT',
-    data,
+    data: removeUndefined(data),
     ...options
   });
 };
@@ -176,7 +186,7 @@ export const del = (url: string, data?: any, options?: Omit<RequestOptions, 'url
   return request({
     url,
     method: 'DELETE',
-    data,
+    data: removeUndefined(data),
     ...options
   });
 };

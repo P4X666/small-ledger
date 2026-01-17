@@ -7,7 +7,6 @@
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   position: relative;
-  overflow: hidden;
   
   &::before {
     content: '';
@@ -26,14 +25,19 @@
 
 /* 筛选控制面板 - 整合视图切换和时间周期 */
 .filter-control-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  // display: flex;
+  // flex-direction: column;
+  // gap: 12px;
   margin-bottom: 16px;
 }
 
 /* 筛选栏：时间周期 + 重要/紧急按钮 */
 .filter-bar {
+  
+  position: sticky;
+  top: calc(var(--nut-navbar-height, 88rpx) + var(--status-bar-height, 60rpx));
+  left: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -43,6 +47,8 @@
   background: var(--bg-primary);
   box-shadow: 0 6px 20px var(--shadow-light);
   font-size: 28px;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  backdrop-filter: blur(10px);
 }
 
 .period-filters {
@@ -274,7 +280,7 @@
       .task-item-card {
         background: var(--bg-gray);
         padding: 20px;
-        margin-bottom: 14px;
+        margin-bottom: 32px;
         border-radius: 14px;
         transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         border-left: 3px solid transparent;

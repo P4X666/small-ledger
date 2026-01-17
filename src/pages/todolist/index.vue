@@ -9,44 +9,38 @@
     :style="{ '--status-bar-height': statusBarHeight + 'px' }"
   ></nut-navbar>
   <view class="container">
-    <!-- 筛选控制面板 -->
+    <!-- 筛选栏：时间周期 + 重要/紧急按钮 -->
+    <view class="filter-bar" :style="{ '--status-bar-height': statusBarHeight + 'px' }">
+      <!-- 时间周期切换标签 -->
+      <view class="period-filters" @tap="showPeriodHandle">
+        <view>时间周期：</view>
+        <view>{{ getPeriodLabel(currentPeriod) }}</view>
+      </view>
+      
+      <!-- 重要/紧急筛选按钮 -->
+      <view class="priority-filters">
+        <view :class="['filter-btn', { active: filterState.important }]" @tap="toggleFilter('important')">
+          <Star size="16" color="currentColor" />
+          <text>重要</text>
+        </view>
+        <view :class="['filter-btn', { active: filterState.urgent }]" @tap="toggleFilter('urgent')">
+          <Clock size="16" color="currentColor" />
+          <text>紧急</text>
+        </view>
+      </view>
+    </view>
     <view class="filter-control-panel">
       <!-- 列表视图内容 -->
       <view class="list-container">
         <!-- 任务搜索表单 -->
-        <view class="search-task-card">
+        <!-- <view class="search-task-card">
           <input v-model="newTaskTitle" placeholder="输入任务名称" class="task-input" />
-        </view>
-
-        <!-- 筛选栏：时间周期 + 重要/紧急按钮 -->
-        <view class="filter-bar">
-          <!-- 时间周期切换标签 -->
-          <view class="period-filters" @tap="showPeriodHandle">
-            <view>时间周期：</view>
-            <view>{{ getPeriodLabel(currentPeriod) }}</view>
-          </view>
-          
-          <!-- 重要/紧急筛选按钮 -->
-          <view class="priority-filters">
-            <view :class="['filter-btn', { active: filterState.important }]" @tap="toggleFilter('important')">
-              <Star size="16" color="currentColor" />
-              <text>重要</text>
-            </view>
-            <view :class="['filter-btn', { active: filterState.urgent }]" @tap="toggleFilter('urgent')">
-              <Clock size="16" color="currentColor" />
-              <text>紧急</text>
-            </view>
-          </view>
-        </view>
+        </view> -->
 
         <!-- 任务列表 -->
         <view class="task-list-section">
-          <!-- <view class="section-header">
-            <text class="section-title">任务列表</text>
-            <text class="section-count">{{ totalTasksCount }} 个任务</text>
-          </view> -->
-          <view class="task-list" :style="{ paddingBottom: tabBarHeight }">
-            <view v-if="filteredTasks.length === 0" class="empty-state">
+          <view id="task-list" class="task-list" :style="{ paddingBottom: tabBarHeight }">
+            <view v-if="filteredTasks.length === 0 && !loading" class="empty-state">
               <text class="empty-title">暂无任务</text>
               <text class="empty-subtitle">快来创建第一个任务吧！</text>
             </view>
@@ -73,7 +67,7 @@
                 </view>
               </view>
               <view class="task-actions">
-                <nut-button @tap="editTask(task)" class="edit-btn">
+                <nut-button @tap="editTask(task.id)" class="edit-btn">
                   <Edit size="16" color="var(--primary-color)" />
                 </nut-button>
                 <nut-button @tap="deleteTask(task.id)" class="delete-btn">
@@ -81,7 +75,7 @@
                 </nut-button>
               </view>
             </view>
-            <ListLoading :isEnd="isEnd" />
+            <ListLoading v-if="filteredTasks.length !== 0" :isEnd="isEnd"  />
           </view>
         </view>
       </view>
@@ -100,7 +94,7 @@
 <script setup lang="ts">
 import { ref, computed, Ref } from 'vue';
 import { useTodoStore, type TimePeriod } from '@/store/todo';
-import Taro, { useDidShow } from '@tarojs/taro';
+import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
 import { Edit, Del, Star, Clock } from '@nutui/icons-vue-taro';
 import { TaskStatus } from '@/constants/common';
 import { getTabBarInstance } from '@/utils/tab-bar';
@@ -124,7 +118,6 @@ const timePeriods: Ref<TimePeriodItem[]> = ref([
 ]);
 
 // 响应式数据
-const newTaskTitle = ref('');
 const currentPeriod = ref<TimePeriod>('none');
 const showPeriods = ref(false);
 const editingTask = ref<any>(null);
@@ -137,38 +130,25 @@ const filterState = ref({
   urgent: false
 });
 // 列表加载状态
-const isEnd = ref(false);
+const isEnd = computed(()=>todoStore.isEnd);
+const loading = computed(()=>todoStore.isLoading);
 
-// 计算属性：根据当前选择的时间周期和筛选条件过滤任务
+useReachBottom(()=>{
+  loadTasks()
+})
+
 const filteredTasks = computed(() => {
-  let tasks = todoStore.tasks;
-  
-  // 按时间周期过滤
-  if (currentPeriod.value !== 'none') {
-    tasks = todoStore.getTasksByTimePeriod(currentPeriod.value);
-  }
-  
-  // 按重要性过滤
-  if (filterState.value.important) {
-    tasks = tasks.filter(task => task.importance === 4);
-  }
-  
-  // 按紧急性过滤
-  if (filterState.value.urgent) {
-    tasks = tasks.filter(task => task.urgency === 4);
-  }
-  
-  return tasks;
-});
-
-const totalTasksCount = computed(() => {
-  return todoStore.totalTasksCount;
+  return todoStore.tasks;
 });
 
 // 加载任务数据
-const loadTasks = async () => {
+const loadTasks = async (reset = false) => {
   try {
-    await todoStore.loadTasks();
+    await todoStore.loadTasks(reset, {
+      timePeriod: currentPeriod.value==='none'?undefined:currentPeriod.value,
+      importance: filterState.value.important ? 4 : undefined,
+      urgency: filterState.value.urgent ? 4 : undefined,
+    });
   } catch (error) {
     console.error('加载任务失败:', error);
   }
@@ -176,17 +156,20 @@ const loadTasks = async () => {
 
 const tabBarHeight = ref('60rpx');
 
+useLoad(()=>{
+  loadTasks()
+})
 // 页面显示时更新底部栏高亮状态
 useDidShow(() => {
   const tabBar = getTabBarInstance();
   tabBar.updateTabbarSelectedIndex(1);
   tabBarHeight.value = tabBar.tabBarHeight;
-  loadTasks();
 }); 
 
 // 切换筛选条件（重要/紧急）
 const toggleFilter = (filterType: 'important' | 'urgent') => {
   filterState.value[filterType] = !filterState.value[filterType];
+  loadTasks(true)
 };
 
 // 获取时间周期标签
@@ -197,53 +180,16 @@ const getPeriodLabel = (period: TimePeriod): string => {
 const onChangePeriod=(item: TimePeriodItem)=>{
   currentPeriod.value = item.value
   showPeriods.value = false
-  setTimeout(() => {
-    console.log(showPeriods.value);
-    
-  }, 1000);
+  loadTasks(true)
 }
 const showPeriodHandle = ()=>{
   showPeriods.value = true
 }
 // 编辑任务
-const editTask = (task: any) => {
-  editingTask.value = { ...task };
-  // 找到当前任务的时间周期索引
-  const periodIndex = timePeriods.value.findIndex(p => p.value === task.timePeriod);
-  editingTaskPeriodIndex.value = periodIndex !== -1 ? periodIndex : 0;
-
-  // 设置优先级状态
-  editingTaskImportant.value = task.priority?.important || false;
-  editingTaskUrgent.value = task.priority?.urgent || false;
-};
-
-// 保存编辑后的任务
-const saveEditedTask = async () => {
-  if (editingTask.value && editingTask.value.title.trim()) {
-    const selectedPeriod = timePeriods.value[editingTaskPeriodIndex.value].value;
-
-    try {
-      await todoStore.updateTask(editingTask.value.id, {
-        title: editingTask.value.title.trim(),
-        timePeriod: selectedPeriod,
-        importance: editingTask.value.importance,
-        urgency: editingTask.value.urgency,
-      });
-
-      editingTask.value = null;
-    } catch (error: any) {
-      Taro.showToast({
-        title: error.message || '任务更新失败',
-        icon: 'none',
-        duration: 2000
-      });
-    }
-  }
-};
-
-// 取消编辑
-const cancelEdit = () => {
-  editingTask.value = null;
+const editTask = (id: string) => {
+  Taro.navigateTo({
+    url: '/pages/todolist/detail/index?id=' + id
+  })
 };
 
 // 删除任务
