@@ -1,12 +1,16 @@
 <template>
+  <!-- <nut-navbar 
+    :title="isViewMode ? '目标详情' : '添加目标'" 
+    left-show 
+    @click-back="goBack" 
+    fixed 
+    placeholder 
+    safe-area-inset-top 
+    z-index="999"
+    class="custom-navbar"
+    :style="{ '--status-bar-height': statusBarHeight + 'px' }"
+  ></nut-navbar> -->
   <view class="container" :style="{ paddingTop: navigationBarHeight + 'px' }">
-    <view class="header">
-      <nut-button type="default" @tap="goBack" class="back-btn">
-        <nut-icon name="arrow-left" size="18" color="#333" />
-      </nut-button>
-      <text class="title">创建攒钱目标</text>
-      <view class="placeholder"></view>
-    </view>
     
     <view class="content">
       <!-- 目标名称 -->
@@ -38,7 +42,7 @@
         <text class="field-label">目标期限</text>
         <picker mode="selector" :range="periodOptions" :value="newGoal.periodIndex" @change="handlePeriodChange">
           <view class="period-picker">
-            <nut-icon name="calendar" size="16" color="#666" class="picker-icon" />
+            <Date size="16" color="#666" class="picker-icon" />
             <text class="picker-text">{{ periodOptions[newGoal.periodIndex] }}</text>
           </view>
         </picker>
@@ -58,11 +62,11 @@
     
     <view class="footer">
       <button @tap="goBack" class="cancel-btn">
-        <nut-icon name="close" size="16" color="#666" />
+        <Close size="16" color="#666" class="close-icon" />
         取消
       </button>
       <button @tap="createGoal" class="confirm-btn" :disabled="!canCreateGoal">
-        <nut-icon name="check" size="16" color="#fff" />
+        <Check size="16" color="#fff" class="check-icon" />
         确认创建
       </button>
     </view>
@@ -71,6 +75,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import dayjs from 'dayjs';
+import { Date, Close, Check } from '@nutui/icons-vue-taro';
 import { useGoalsStore } from '@/store/goals';
 import type { GoalPeriod } from '@/store/goals';
 import Taro, { useDidShow, useLoad } from '@tarojs/taro';
@@ -113,19 +119,20 @@ const getPeriodFromString = (periodString: string): GoalPeriod => {
 };
 
 const calculateEndDate = (period: GoalPeriod): string => {
-  const endDate = new Date();
+  const endDate = dayjs();
   switch (period) {
     case 'month':
-      endDate.setMonth(endDate.getMonth() + 1);
+      // endDate.setMonth(endDate.getMonth() + 1);
+      endDate.add(1, 'month');
       break;
     case 'quarter':
-      endDate.setMonth(endDate.getMonth() + 3);
+      endDate.add(3, 'month');
       break;
     case 'half_year':
-      endDate.setMonth(endDate.getMonth() + 6);
+      endDate.add(6, 'month');
       break;
     case 'year':
-      endDate.setFullYear(endDate.getFullYear() + 1);
+      endDate.add(1, 'year');
       break;
   }
   return endDate.toISOString();

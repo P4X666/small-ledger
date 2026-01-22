@@ -2,39 +2,32 @@
   padding: 32px;
   padding-bottom: 120px; /* 为底部栏留出空间 */
   background-color: var(--bg-tertiary);
-  min-height: 100vh;
 }
 
-.header {
-  margin-bottom: 40px;
-}
-
-.title-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.title {
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
+// .header {
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   z-index: 100;
+//   background: var(--bg-primary);
+// }
 
 .month-selector {
+  position: sticky;
+  z-index: 100;
   margin-bottom: 32px;
   .picker {
     background: var(--bg-primary);
     padding: 24px 32px;
-    border-radius: 24px;
+    // border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 16px;
     font-size: 32px;
     color: var(--text-primary);
-    box-shadow: 0 4px 16px var(--shadow-primary);
+    // box-shadow: 0 4px 16px var(--shadow-primary);
   }
   .picker-text {
     font-weight: 500;
@@ -123,156 +116,28 @@
   }
 }
 
-.record-form {
-  background: var(--bg-primary);
+/* 添加记录按钮 */
+.add-record-btn {
+  background-color: var(--secondary-color);
+  color: var(--text-white);
+  border: none;
   border-radius: 32px;
-  padding: 40px;
+  height: 112px;
+  font-size: 36px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition: all 0.3s;
   margin-bottom: 40px;
-  box-shadow: 0 4px 16px var(--shadow-primary);
-  .form-header {
-    margin-bottom: 32px;
-    .form-title {
-      font-size: 36px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-  }
-  .type-selector {
-    display: flex;
-    margin-bottom: 40px;
-    gap: 24px;
-    .type-item {
-      flex: 1;
-      text-align: center;
-      padding: 32px;
-      border: 2px solid var(--border-secondary);
-      border-radius: 24px;
-      transition: all 0.3s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      &.active {
-        border-color: var(--secondary-color);
-        background-color: var(--secondary-color-light);
-        .type-text {
-          color: var(--secondary-color);
-          font-weight: 500;
-        }
-      }
-    }
-    .type-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .income-bg {
-      background-color: var(--success-color);
-    }
-    .expense-bg {
-      background-color: var(--error-color);
-    }
-    .type-text {
-      font-size: 28px;
-      color: var(--text-secondary);
-    }
-  }
-  .form-field {
-    margin-bottom: 36px;
-    .field-label {
-      display: block;
-      margin-bottom: 16px;
-      font-size: 28px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-    .amount-input-container {
-      display: flex;
-      align-items: center;
-      border: 2px solid var(--border-secondary);
-      border-radius: 24px;
-      padding: 0 32px;
-      transition: all 0.3s;
-      &:focus-within {
-        border-color: var(--secondary-color);
-        box-shadow: 0 0 0 4px var(--shadow-focus);
-      }
-      .currency-symbol {
-        font-size: 40px;
-        font-weight: 500;
-        color: var(--text-primary);
-        margin-right: 16px;
-      }
-      .amount-input {
-        flex: 1;
-        height: 96px;
-        font-size: 40px;
-        color: var(--text-primary);
-      }
-      .amount-input.focus {
-        border-color: var(--secondary-color);
-      }
-    }
-    .category-picker {
-      border: 2px solid var(--border-secondary);
-      border-radius: 24px;
-      padding: 24px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: var(--bg-secondary);
-      .picker-text {
-        flex: 1;
-        margin-left: 16px;
-        color: var(--text-primary);
-        font-size: 28px;
-      }
-    }
-    .remark-input {
-      width: 100%;
-      border: 2px solid var(--border-secondary);
-      border-radius: 24px;
-      padding: 24px 32px;
-      height: 96px;
-      box-sizing: border-box;
-      font-size: 28px;
-      &:focus {
-        outline: none;
-        border-color: var(--secondary-color);
-        box-shadow: 0 0 0 4px var(--shadow-focus);
-      }
-      &.focus {
-        border-color: var(--secondary-color);
-      }
-    }
-  }
-  .add-btn {
-    background-color: var(--secondary-color);
-    color: var(--text-white);
-    border: none;
-    border-radius: 24px;
-    height: 96px;
-    font-size: 32px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    transition: all 0.3s;
-    &:disabled {
-      background-color: var(--disabled-color);
-      opacity: 0.6;
-    }
-    &:active:not(:disabled) {
-      background-color: var(--secondary-color-dark);
-      transform: scale(0.98);
-    }
+  box-shadow: 0 8px 24px var(--shadow-primary);
+  &:active {
+    background-color: var(--secondary-color-dark);
+    transform: scale(0.98);
   }
   .btn-text {
-    font-size: 32px;
+    font-size: 36px;
   }
 }
 
@@ -303,10 +168,26 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
-  }
-  .empty-text {
-    font-size: 28px;
+    gap: 40px;
+    .empty-text {
+      font-size: 28px;
+    }
+    .empty-add-btn {
+      background: none;
+      border: 2px solid var(--secondary-color);
+      color: var(--secondary-color);
+      border-radius: 24px;
+      padding: 16px 32px;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s;
+      &:active {
+        background-color: var(--secondary-color-light);
+      }
+    }
   }
   .record-item {
     padding: 32px;
@@ -380,128 +261,7 @@
   }
   .record-actions {
     display: flex;
-    gap: 16px;
-  }
-  .action-btn {
-    width: 64px;
-    height: 64px;
-    border-radius: 12px;
-    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    &.edit-btn {
-      background-color: #e6f7ff;
-    }
-    &.delete-btn {
-      background-color: var(--bg-error-light);
-    }
-    &:active {
-      opacity: 0.8;
-    }
-  }
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--shadow-modal);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: var(--bg-primary);
-  border-radius: 40px;
-  padding: 48px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 20px 80px var(--shadow-deep);
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
-  }
-  .modal-title {
-    font-size: 36px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-  .close-btn {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background-color: var(--bg-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    &:active {
-      background-color: var(--border-secondary);
-    }
-  }
-  .modal-selector {
-    margin-bottom: 40px;
-  }
-  .modal-field {
-    margin-bottom: 40px;
-    .field-label {
-      display: block;
-      margin-bottom: 16px;
-      font-size: 28px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-    .modal-picker {
-      border: 2px solid var(--border-secondary);
-      border-radius: 24px;
-      padding: 24px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 28px;
-    }
-  }
-  .modal-actions {
-    display: flex;
-    margin-top: 48px;
-    gap: 24px;
-    .cancel-btn,
-    .save-btn {
-      flex: 1;
-      height: 88px;
-      border-radius: 24px;
-      font-size: 30px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      transition: all 0.3s;
-    }
-    .cancel-btn {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      &:active {
-        background-color: var(--border-secondary);
-      }
-    }
-    .save-btn {
-      background: var(--secondary-color);
-      color: var(--text-white);
-      &:disabled {
-        background: var(--disabled-color);
-        opacity: 0.6;
-      }
-      &:active:not(:disabled) {
-        background-color: var(--secondary-color-dark);
-      }
-    }
   }
 }

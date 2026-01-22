@@ -121,3 +121,6 @@ page {
     @extend .safe-area;
   }
 }
+.input-placeholder {
+  color: var(--placeholder-color);
+}

@@ -1,0 +1,202 @@
+/* 记账详情页面样式 */
+page {
+  background-color: var(--bg-tertiary);
+}
+.container {
+//   padding-top: 20px;
+  padding-bottom: 60px;
+}
+
+/* 表单样式 */
+.record-form {
+  padding: 40px;
+}
+.section {
+  background-color: var(--bg-primary);
+  
+  border-radius: 16px;
+  margin: 30px;
+  box-shadow: 0 4px 20px var(--shadow-primary);
+//   .nut-cell {
+//     padding-inline: 0;
+//   }
+}
+
+/* 表单字段 */
+.form-field {
+  margin-bottom: 40px;
+}
+
+.field-label {
+  display: block;
+  font-size: 28px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+/* 金额输入 */
+.amount-input-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-primary);
+  border-radius: 36px;
+  padding: 24px 30px;
+  transition: all 0.3s ease;
+}
+
+.amount-input-container:focus-within {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 2px var(--shadow-focus);
+}
+
+.currency-symbol {
+  font-size: 36px;
+  color: var(--text-primary);
+  margin-right: 8px;
+}
+
+.amount-input {
+  flex: 1;
+  font-size: 32px;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--text-primary);
+}
+
+/* 类别选择器 */
+.category-picker {
+//   color: var(--text-quaternary);
+}
+
+.picker-text {
+  flex: 1;
+  font-size: 28px;
+  color: var(--placeholder-color);
+  margin-left: 8px;
+  &.active {
+    color: var(--text-primary);
+  }
+}
+
+/* 备注输入 */
+.remark-input {
+  width: 100%;
+  border: 1px solid var(--border-primary);
+  border-radius: 36px;
+  padding: 24px 30px;
+  font-size: 28px;
+  outline: none;
+  transition: all 0.3s ease;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+
+.remark-input:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 2px var(--shadow-focus);
+}
+
+/* 表单操作按钮 */
+.form-actions {
+  display: flex;
+  gap: 30px;
+  margin-top: 60px;
+}
+
+.cancel-btn,
+.save-btn {
+  flex: 1;
+  height: 88px;
+  border-radius: 32px;
+  font-size: 36px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.cancel-btn:active {
+  background-color: var(--bg-tertiary);
+}
+
+.save-btn {
+  background-color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+  color: var(--text-white);
+}
+
+.save-btn:active {
+  background-color: var(--secondary-color-dark);
+}
+
+.save-btn:disabled {
+  background-color: var(--disabled-color);
+  border-color: var(--disabled-color);
+  color: var(--text-white);
+  opacity: 0.6;
+}
+
+/* 金额样式 */
+.amount {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.amount.income {
+  color: var(--success-color);
+}
+
+.amount.expense {
+  color: var(--error-color);
+}
+
+/* 详情操作按钮 */
+.detail-actions {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.edit-btn,
+.delete-btn {
+  flex: 1;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 36px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.edit-btn {
+  background-color: var(--bg-primary);
+  border: none;
+  border-right: 1px solid var(--border-light);
+  color: var(--primary-color);
+}
+
+.edit-btn:active {
+  background-color: var(--bg-tertiary);
+}
+
+.delete-btn {
+  background-color: var(--bg-primary);
+  border: none;
+  color: var(--danger-color);
+}
+
+.delete-btn:active {
+  background-color: var(--bg-tertiary);
+}

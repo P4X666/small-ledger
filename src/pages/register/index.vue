@@ -58,7 +58,7 @@ import { useNavigationBar } from '@/utils/navigation';
 import './index.scss';
 
 // 使用顶部栏高度管理组合式函数
-const { statusBarHeight, navigationBarHeight } = useNavigationBar();
+const { navigationBarHeight } = useNavigationBar();
 
 // 表单数据
 const formData = reactive({
