@@ -58,14 +58,23 @@
         <text class="record-count">{{ filteredRecords.length }}条记录</text>
       </view>
       <view class="records-list">
-        <view v-if="filteredRecords.length === 0" class="empty-state">
+        <!-- 加载状态 -->
+        <view v-if="accountingStore.isLoading" class="loading-state">
+          <text class="loading-text">加载中...</text>
+        </view>
+        
+        <!-- 空状态 -->
+        <view v-else-if="filteredRecords.length === 0" class="empty-state">
           <text class="empty-text">本月暂无记账记录</text>
           <button @tap="navigateToAddRecord" class="empty-add-btn">
             <Plus size="16" color="currentColor" />
             <text>添加第一条记录</text>
           </button>
         </view>
+        
+        <!-- 记录列表 -->
         <view 
+          v-else
           v-for="record in filteredRecords" 
           :key="record.id" 
           class="record-item"
@@ -99,10 +108,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { Date as DateIcon, RectDown, Add, Plus, Minus, ArrowRight, TriangleUp, TriangleDown } from '@nutui/icons-vue-taro';
 import { useAccountingStore } from '@/store/accounting';
-import Taro, { useDidShow } from '@tarojs/taro';
+import Taro, { useDidShow, useLoad } from '@tarojs/taro';
 import { useNavigationBar } from '@/utils/navigation';
 import { getTabBarInstance } from '@/utils/tab-bar';
 import './index.scss'
@@ -146,6 +155,12 @@ const setCurrentMonth = (date?: Date) => {
   currentDate.value = `${year}-${String(month).padStart(2, '0')}`;
 };
 
+// 月份选择器变化处理
+const onMonthChange = (e: any) => {
+  const date = new Date(e.detail.value);
+  setCurrentMonth(date);
+};
+
 // 导航到添加记录页面
 const navigateToAddRecord = () => {
   Taro.navigateTo({
@@ -161,14 +176,15 @@ const navigateToRecordDetail = (recordId: string) => {
 };
 
 // 生命周期钩子
-onMounted(() => {
+useLoad(async () => {
   setCurrentMonth();
-  accountingStore.loadRecords();
 });
 
 // 页面显示时更新底部栏高亮状态并刷新数据
-useDidShow(() => {
+useDidShow(async () => {
   const tabBar = getTabBarInstance();
   tabBar.updateTabbarSelectedIndex(2);
+  // 刷新数据
+  await accountingStore.loadRecords();
 });
 </script>
