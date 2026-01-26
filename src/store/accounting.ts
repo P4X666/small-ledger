@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import * as accountingApi from '@/api/accounting';
 
 // 定义记账记录的类型
@@ -10,9 +10,15 @@ export interface AccountingRecord {
   type: RecordType;
   amount: number;
   category: string;
-  remark: string;
+  description: string;
   date: string;
   yearMonth: string;
+
+  transactionDate?: string;
+  transactionStartDate: string;
+  transactionEndDate: string;
+  product?: string;
+  shop: string;
 }
 
 // 记账状态管理
@@ -23,47 +29,41 @@ export const useAccountingStore = defineStore('accounting', () => {
   const statistics = ref<{
     totalIncome: number;
     totalExpense: number;
+    totalNeutral: number;
     balance: number;
     monthlySummary: Record<string, { income: number; expense: number; balance: number }>;
-  }>({ totalIncome: 0, totalExpense: 0, balance: 0, monthlySummary: {} });
+  }>({ totalIncome: 0, totalExpense: 0, totalNeutral: 0, balance: 0, monthlySummary: {} });
   
+  const total = ref(0);
+
   // 预设的收入和支出类别
   const PRESET_CATEGORIES = {
     income: ['工资', '奖金', '投资收益', '兼职', '礼金', '其他收入'],
     expense: ['餐饮', '交通', '购物', '娱乐', '医疗', '教育', '住房', '其他支出']
   };
   
-  // 计算属性
-  const totalIncome = computed(() => {
-    return records.value
-      .filter(record => record.type === 'income')
-      .reduce((sum, record) => sum + record.amount, 0);
-  });
-  
-  const totalExpense = computed(() => {
-    return records.value
-      .filter(record => record.type === 'expense')
-      .reduce((sum, record) => sum + record.amount, 0);
-  });
-  
-  const totalBalance = computed(() => {
-    return totalIncome.value - totalExpense.value;
-  });
-  
   // 方法：从API加载记账记录
   const loadRecords = async () => {
     try {
       isLoading.value = true;
       const fetchedRecords = await accountingApi.getTransactions();
+      total.value = fetchedRecords.meta.totalItems
       // 数据格式验证
-      if (Array.isArray(fetchedRecords)) {
-        records.value = fetchedRecords;
+      if (Array.isArray(fetchedRecords.data)) {
+        // transactionDate
+        // const newData:AccountingRecord[] = []
+        // fetchedRecords.data.forEach(item=>{
+        //   const newItem = {...item}
+        //   if(item.transactionDate){
+        //     newItem.transactionDate = dayjs(item.transactionDate).format('YYYY年MM月DD日 HH:mm:ss')
+        //   }
+        //   newData.push(newItem)
+        // })
+        records.value = fetchedRecords.data;
       } else {
         console.error('记账记录数据格式错误');
         records.value = [];
       }
-      // 加载统计信息
-      await loadStatistics();
     } catch (error) {
       console.error('加载记账记录失败:', error);
       records.value = [];
@@ -101,14 +101,12 @@ export const useAccountingStore = defineStore('accounting', () => {
         type: recordData.type,
         amount: recordData.amount,
         category: recordData.category,
-        remark: recordData.remark || '',
+        remark: recordData.description || '',
         date: recordData.date
       });
       
       // 使用展开运算符创建新数组，提高响应式性能
       records.value = [newRecord, ...records.value];
-      // 更新统计信息
-      await loadStatistics();
       return newRecord;
     } catch (error) {
       console.error('创建记账记录失败:', error);
@@ -127,7 +125,7 @@ export const useAccountingStore = defineStore('accounting', () => {
         date: updatedData.date,
         amount: updatedData.amount,
         category: updatedData.category,
-        remark: updatedData.remark
+        remark: updatedData.description
       });
       
       // 更新本地记录
@@ -291,19 +289,11 @@ export const useAccountingStore = defineStore('accounting', () => {
     }
   };
   
-  // 初始化时加载数据
-  loadRecords();
-  
   return {
     // 状态
     records,
     isLoading,
     statistics,
-    
-    // 计算属性
-    totalIncome,
-    totalExpense,
-    totalBalance,
     
     // 方法
     loadRecords,

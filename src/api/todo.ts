@@ -1,21 +1,7 @@
 import type { TaskStatus } from '@/constants/common';
 import { get, post, put, del } from '../utils/request';
+import type { CommonListResponseData } from '../utils/request';
 import type { Task, TimePeriod } from '@/store/todo';
-
-// API响应数据类型
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-}
-
-// Taro请求响应类型
-interface RequestResponse<T> {
-  statusCode: number;
-  data: ApiResponse<T>;
-  header: Record<string, any>;
-  cookies: string[];
-}
 
 // 创建任务请求参数
 interface CreateTaskParams {
@@ -38,21 +24,8 @@ interface TaskListParams {
   urgency?: number;
 }
 
-interface TaskListResponse {
+interface TaskListResponse extends CommonListResponseData {
   data: Task[];
-  links: {
-    first?: string;
-    last?: string;
-    current: string;
-    prev?: string | null;
-    next?: string | null;
-  };
-  meta: {
-    currentPage: number;
-    itemsPerPage: number;
-    totalItems: number;
-    totalPages: number;
-  }
 }
 /**
  * 获取所有任务
@@ -64,7 +37,7 @@ export const getAllTasks = async (params={} as TaskListParams): Promise<TaskList
       showLoading: true,
       loadingTitle: '加载任务中...'
     });
-    return (response as RequestResponse<TaskListResponse>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取任务列表失败');
   }
@@ -85,7 +58,7 @@ export const getTasksNum = async (): Promise<TasksStatistics> => {
       showLoading: true,
       loadingTitle: '加载任务中...'
     });
-    return (response as RequestResponse<TasksStatistics>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取任务列表失败');
   }
@@ -102,7 +75,7 @@ export const getTaskById = async (id: string): Promise<Task> => {
       showLoading: true,
       loadingTitle: '加载任务详情中...'
     });
-    return (response as RequestResponse<Task>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取任务详情失败');
   }
@@ -119,7 +92,7 @@ export const createTask = async (params: CreateTaskParams): Promise<Task> => {
       showLoading: true,
       loadingTitle: '创建任务中...'
     });
-    return (response as RequestResponse<Task>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw error;
   }
@@ -137,7 +110,7 @@ export const updateTask = async (id: string, params: UpdateTaskParams): Promise<
       showLoading: true,
       loadingTitle: '更新任务中...'
     });
-    return (response as RequestResponse<Task>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw error;
   }
@@ -155,7 +128,7 @@ export const updateTaskStatus = async (id: string, status: TaskStatus): Promise<
       showLoading: true,
       loadingTitle: '更新任务状态中...'
     });
-    return (response as RequestResponse<Task>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '更新任务状态失败');
   }
@@ -188,7 +161,7 @@ export const getTasksByTimePeriod = async (period: TimePeriod): Promise<Task[]> 
       showLoading: true,
       loadingTitle: '加载任务中...'
     });
-    return (response as RequestResponse<Task[]>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取任务列表失败');
   }
@@ -209,12 +182,7 @@ export const getTasksByQuadrant = async (): Promise<{
       showLoading: true,
       loadingTitle: '加载四象限任务中...'
     });
-    return (response as RequestResponse<{
-      first: Task[];
-      second: Task[];
-      third: Task[];
-      fourth: Task[];
-    }>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取四象限任务失败');
   }

@@ -1,35 +1,34 @@
 .container {
-  padding: 32px;
-  padding-bottom: 120px; /* 为底部栏留出空间 */
-  background-color: var(--bg-tertiary);
+  padding: 0 32px 120px;
+  /* 为底部栏留出空间 */
+  background: var(--bg-primary);
+
+
+  --income-bg: var(--bg-error-light);
+  --expense-bg: var(--bg-success-light);
 }
 
-// .header {
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   z-index: 100;
-//   background: var(--bg-primary);
-// }
-
-.month-selector {
+.date-selector {
   position: sticky;
+  top: 0;
   z-index: 100;
+  display: flex;
+  justify-content: center;
   margin-bottom: 32px;
-  .picker {
-    background: var(--bg-primary);
-    padding: 24px 32px;
-    // border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    font-size: 32px;
-    color: var(--text-primary);
-    // box-shadow: 0 4px 16px var(--shadow-primary);
+  background: var(--bg-primary);
+  .date-view {
+    margin-right: 20px;
   }
-  .picker-text {
+}
+.date-detail {
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 32px;
+  color: var(--text-primary);
+  .date-text {
     font-weight: 500;
     font-size: 32px;
   }
@@ -42,18 +41,22 @@
   margin-bottom: 40px;
   box-shadow: 0 4px 16px var(--shadow-primary);
   overflow: hidden;
+
   .overview-header {
     margin-bottom: 32px;
+
     .overview-title {
       font-size: 36px;
       font-weight: 600;
       color: var(--text-primary);
     }
   }
+
   .overview-content {
     display: flex;
     justify-content: space-between;
   }
+
   .overview-item {
     text-align: center;
     flex: 1;
@@ -61,54 +64,66 @@
     flex-direction: column;
     align-items: center;
   }
+
   .item-icon {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
   }
+
   .income-icon {
-    background-color: var(--bg-success-light);
+    background-color: var(--income-bg);
   }
+
   .expense-icon {
-    background-color: var(--bg-error-light);
+    background-color: var(--expense-bg);
   }
+
   .balance-icon {
     &.positive {
-      background-color: var(--bg-success-light);
+      background-color: var(--income-bg);
     }
+
     &.negative {
-      background-color: var(--bg-error-light);
+      background-color: var(--expense-bg);
     }
   }
+
   .label {
     display: block;
     font-size: 26px;
     color: var(--text-secondary);
     margin-bottom: 12px;
   }
+
   .amount {
     display: block;
-    font-size: 36px;
+    font-size: 28px;
     font-weight: bold;
+
     &.income {
-      color: var(--success-color);
+      color: var(--income-color);
     }
+
     &.expense {
-      color: var(--error-color);
+      color: var(--expense-color);
     }
+
     &.balance {
       &.positive {
-        color: var(--success-color);
+        color: var(--income-color);
       }
+
       &.negative {
-        color: var(--error-color);
+        color: var(--expense-color);
       }
     }
   }
+
   .overview-divider {
     width: 2px;
     background: var(--border-primary);
@@ -132,10 +147,12 @@
   transition: all 0.3s;
   margin-bottom: 40px;
   box-shadow: 0 8px 24px var(--shadow-primary);
+
   &:active {
     background-color: var(--secondary-color-dark);
     transform: scale(0.98);
   }
+
   .btn-text {
     font-size: 36px;
   }
@@ -146,21 +163,25 @@
   border-radius: 32px;
   padding: 40px;
   box-shadow: 0 4px 16px var(--shadow-primary);
+
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 32px;
   }
+
   .section-title {
     font-size: 36px;
     font-weight: 600;
     color: var(--text-primary);
   }
+
   .record-count {
     font-size: 28px;
     color: var(--text-tertiary);
   }
+
   .empty-state {
     text-align: center;
     padding: 120px 0;
@@ -169,9 +190,11 @@
     flex-direction: column;
     align-items: center;
     gap: 40px;
+
     .empty-text {
       font-size: 28px;
     }
+
     .empty-add-btn {
       background: none;
       border: 2px solid var(--secondary-color);
@@ -184,11 +207,13 @@
       justify-content: center;
       gap: 12px;
       transition: all 0.3s;
+
       &:active {
         background-color: var(--secondary-color-light);
       }
     }
   }
+
   .record-item {
     padding: 32px;
     border-radius: 24px;
@@ -199,17 +224,21 @@
     align-items: center;
     gap: 24px;
     transition: all 0.3s;
+
     &:active {
       transform: translateY(2px);
       opacity: 0.9;
     }
+
     &.income {
-      border-left: 8px solid var(--success-color);
+      border-left: 8px solid var(--income-color);
     }
+
     &.expense {
-      border-left: 8px solid var(--error-color);
+      border-left: 8px solid var(--expense-color);
     }
   }
+
   .record-icon {
     width: 64px;
     height: 64px;
@@ -220,38 +249,48 @@
     justify-content: center;
     flex-shrink: 0;
   }
+
   .record-info {
     flex: 1;
   }
+
   .record-header {
-    display: flex;
-    justify-content: space-between;
+    // display: flex;
+    // justify-content: space-between;
     margin-bottom: 12px;
-  }
-  .record-category {
-    font-size: 32px;
-    font-weight: 500;
-    color: var(--text-primary);
-  }
-  .record-amount {
-    font-size: 36px;
-    font-weight: bold;
-    &.income {
-      color: var(--success-color);
+
+    .record-product {
+      // margin-right: 10px;
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--text-primary);
     }
-    &.expense {
-      color: var(--error-color);
+
+    .record-amount {
+      font-size: 36px;
+      font-weight: bold;
+
+      &.income {
+        color: var(--income-color);
+      }
+
+      &.expense {
+        color: var(--expense-color);
+      }
     }
   }
+
   .record-meta {
     display: flex;
     align-items: center;
     gap: 24px;
   }
+
   .record-date {
     font-size: 24px;
     color: var(--text-tertiary);
   }
+
   .record-remark {
     font-size: 24px;
     color: var(--text-secondary);
@@ -259,6 +298,7 @@
     padding: 4px 16px;
     border-radius: 20px;
   }
+
   .record-actions {
     display: flex;
     align-items: center;

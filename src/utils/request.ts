@@ -12,6 +12,36 @@ interface ResponseData {
   data?: any;
 }
 
+interface ApiResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+export interface RequestResponse<T> {
+  statusCode: number;
+  data: ApiResponse<T>;
+  header: Record<string, any>;
+  cookies: string[];
+}
+
+export interface CommonListResponseData {
+  data: unknown;
+  links: {
+    first?: string;
+    last?: string;
+    current: string;
+    prev?: string | null;
+    next?: string | null;
+  };
+  meta: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+  }
+}
+
 interface RequestOptions extends Taro.request.Option {
   showLoading?: boolean;
   loadingTitle?: string;

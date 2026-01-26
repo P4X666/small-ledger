@@ -61,3 +61,10 @@ export const DEFAULT_EXPENSE_CATEGORIES = [
     value: 'otherExpense'
   }
 ];
+
+export enum CALENDAR_TYPE {
+  YEAR= 'year',
+  MONTH= 'month',
+  WEEK= 'week',
+  DAY= 'day',
+};

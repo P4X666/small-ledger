@@ -1,20 +1,6 @@
 import { get, post, put, del } from '../utils/request';
+import type { CommonListResponseData } from '../utils/request';
 import type { AccountingRecord, RecordType } from '@/store/accounting';
-
-// API响应数据类型
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-}
-
-// Taro请求响应类型
-interface RequestResponse<T> {
-  statusCode: number;
-  data: ApiResponse<T>;
-  header: Record<string, any>;
-  cookies: string[];
-}
 
 // 创建交易记录请求参数
 interface CreateTransactionParams {
@@ -29,27 +15,15 @@ interface CreateTransactionParams {
 type UpdateTransactionParams = Partial<CreateTransactionParams>;
 
 // 交易记录列表响应
-interface TransactionListResponse {
+interface TransactionListResponse extends CommonListResponseData {
   data: AccountingRecord[];
-  links?: {
-    first?: string;
-    last?: string;
-    current: string;
-    prev?: string | null;
-    next?: string | null;
-  };
-  meta?: {
-    currentPage?: number;
-    itemsPerPage?: number;
-    totalItems?: number;
-    totalPages?: number;
-  };
 }
 
 // 交易统计响应
 interface TransactionStatisticsResponse {
   totalIncome: number;
   totalExpense: number;
+  totalNeutral: number; 
   balance: number;
   monthlySummary: Record<string, {
     income: number;
@@ -62,13 +36,13 @@ interface TransactionStatisticsResponse {
  * 获取所有交易记录
  * @returns 交易记录列表
  */
-export const getTransactions = async (): Promise<AccountingRecord[]> => {
+export const getTransactions = async (): Promise<TransactionListResponse> => {
   try {
     const response = await get('/api/transactions', {}, {
       showLoading: true,
       loadingTitle: '加载交易记录中...'
     });
-    return (response as RequestResponse<TransactionListResponse>).data.data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取交易记录失败');
   }
@@ -85,7 +59,7 @@ export const getTransaction = async (id: string): Promise<AccountingRecord> => {
       showLoading: true,
       loadingTitle: '加载交易记录详情中...'
     });
-    return (response as RequestResponse<AccountingRecord>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取交易记录详情失败');
   }
@@ -102,7 +76,7 @@ export const createTransaction = async (params: CreateTransactionParams): Promis
       showLoading: true,
       loadingTitle: '创建交易记录中...'
     });
-    return (response as RequestResponse<AccountingRecord>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '创建交易记录失败');
   }
@@ -120,7 +94,7 @@ export const updateTransaction = async (id: string, params: UpdateTransactionPar
       showLoading: true,
       loadingTitle: '更新交易记录中...'
     });
-    return (response as RequestResponse<AccountingRecord>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '更新交易记录失败');
   }
@@ -137,7 +111,7 @@ export const deleteTransaction = async (id: string): Promise<boolean> => {
       showLoading: true,
       loadingTitle: '删除交易记录中...'
     });
-    return (response as RequestResponse<boolean>).data.code === 200;
+    return response.data.code === 200;
   } catch (error: any) {
     throw new Error(error.message || '删除交易记录失败');
   }
@@ -153,7 +127,7 @@ export const getTransactionStatistics = async (): Promise<TransactionStatisticsR
       showLoading: true,
       loadingTitle: '加载统计信息中...'
     });
-    return (response as RequestResponse<TransactionStatisticsResponse>).data.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.message || '获取统计信息失败');
   }

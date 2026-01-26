@@ -64,8 +64,8 @@ page {
   
   /* ========== 特殊场景色 - 非标准颜色系统 ========== */
   /* 财务相关颜色 - 按照用户心智模型使用的直观颜色编码 */
-  --income-color: #52c41a; /* 收入相关颜色 - 绿色代表增长与正向，符合用户对收入的心理预期 */
-  --expense-color: #f5222d; /* 支出相关颜色 - 红色代表减少与负向，符合用户对支出的心理预期 */
+  --income-color: #f5222d;
+  --expense-color: #52c41a;
   
   /* 交互状态颜色 - 标准用户体验模式 */
   --disabled-color: #cccccc; /* 禁用状态颜色 - 降低亮度和饱和度，符合可访问性最佳实践 */
@@ -99,6 +99,9 @@ page {
   /* ========== 别名 - 确保兼容性 ========== */
   --danger-color: var(--error-color); /* 危险色别名 - 确保与现有代码兼容 */
   --danger-color-light: var(--error-color-light); /* 危险色浅色别名 */
+
+  // nut-ui 组件库主色调别名
+  --nut-primary-color: var(--primary-color);
 }
 
 .safe-area {
@@ -117,6 +120,11 @@ page {
   padding-bottom: env(safe-area-inset-bottom);
 }
 .action-sheet {
+  .nut-popup--bottom {
+    @extend .safe-area;
+  }
+}
+.custom-calendar {
   .nut-popup--bottom {
     @extend .safe-area;
   }

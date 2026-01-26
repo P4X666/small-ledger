@@ -187,13 +187,13 @@ const getProgressColorClass = (progress: number) => {
 // 页面跳转函数
 const navigateToCreateGoal = () => {
   Taro.navigateTo({
-    url: '/pages/goals/create/index'
+    url: '/pages/goals/detail/index'
   });
 };
 
 const navigateToEditGoal = (goal: SavingsGoal) => {
   Taro.navigateTo({
-    url: `/pages/goals/edit/index?goalId=${goal.id}`
+    url: `/pages/goals/detail/index?goalId=${goal.id}`
   });
 };
 

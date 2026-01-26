@@ -120,10 +120,6 @@ const timePeriods: Ref<TimePeriodItem[]> = ref([
 // 响应式数据
 const currentPeriod = ref<TimePeriod>('none');
 const showPeriods = ref(false);
-const editingTask = ref<any>(null);
-const editingTaskPeriodIndex = ref(0);
-const editingTaskImportant = ref(false);
-const editingTaskUrgent = ref(false);
 // 筛选状态
 const filterState = ref({
   important: false,
