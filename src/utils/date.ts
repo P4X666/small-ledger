@@ -34,3 +34,11 @@ export const getYearEnd = (date: string)=>{
 export const getLastYearStart = (date: string)=>{
     return dayjs(date).subtract(1, 'year').startOf('year').format(FORMAT)
 }
+// 获取半年后的月底
+export const getHalfYearLaterEnd = (date: string)=>{
+    return dayjs(date).add(6, 'month').endOf('month').format(FORMAT)
+}
+//  获取三年后的年底
+export const getThreeYearsLaterEnd = (date: string)=>{
+    return dayjs(date).add(3, 'year').endOf('year').format(FORMAT)
+}

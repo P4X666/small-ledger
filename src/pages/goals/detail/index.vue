@@ -1,16 +1,16 @@
 <template>
-  <!-- <nut-navbar 
-    :title="isViewMode ? '目标详情' : '添加目标'" 
-    left-show 
-    @click-back="goBack" 
-    fixed 
-    placeholder 
-    safe-area-inset-top 
+  <nut-navbar
+    :title="isViewMode ? '目标详情' : '添加目标'"
+    left-show
+    @click-back="goBack"
+    fixed
+    placeholder
+    safe-area-inset-top
     z-index="999"
     class="custom-navbar"
     :style="{ '--status-bar-height': statusBarHeight + 'px' }"
-  ></nut-navbar> -->
-  <view class="container" :style="{ paddingTop: navigationBarHeight + 'px' }">
+  ></nut-navbar>
+  <view class="container">
     
     <view class="content">
       <!-- 目标名称 -->
@@ -37,15 +37,27 @@
         </view>
       </view>
       
+      <!-- 当前金额 -->
+      <view class="form-field">
+        <text class="field-label">当前金额</text>
+        <view class="amount-input-container">
+          <text class="currency-symbol">¥</text>
+          <input 
+            v-model.number="newGoal.currentAmount" 
+            type="digit" 
+            placeholder="0.00"
+            class="amount-input"
+          />
+        </view>
+      </view>
+      
       <!-- 目标期限 -->
       <view class="form-field">
-        <text class="field-label">目标期限</text>
-        <picker mode="selector" :range="periodOptions" :value="newGoal.periodIndex" @change="handlePeriodChange">
-          <view class="period-picker">
-            <Date size="16" color="#666" class="picker-icon" />
-            <text class="picker-text">{{ periodOptions[newGoal.periodIndex] }}</text>
-          </view>
-        </picker>
+        <view class="field-label">目标期限</view>
+        <view class="period-picker" @tap="showCalendar = true">
+          <Date size="16" color="#666" class="picker-icon" />
+          <text class="picker-text">{{ newGoal.startDate }} 至 {{ newGoal.endDate }}</text>
+        </view>
       </view>
       
       <!-- 目标描述 -->
@@ -60,7 +72,7 @@
       </view>
     </view>
     
-    <view class="footer">
+    <view class="footer safe-area">
       <button @tap="goBack" class="cancel-btn">
         <Close size="16" color="#666" class="close-icon" />
         取消
@@ -71,30 +83,48 @@
       </button>
     </view>
   </view>
+  <nut-calendar
+    v-model:visible="showCalendar"
+    type="range"
+    :default-value="[newGoal.startDate, newGoal.endDate]"
+    :start-date="calendarRange[0]"
+    :end-date="calendarRange[1]"
+    @close="showCalendar = false"
+    @choose="chooseDate"
+    class="custom-calendar"
+    z-index="99999"
+    :first-day-of-week="1"
+  >
+  </nut-calendar>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import dayjs from 'dayjs';
 import { Date, Close, Check } from '@nutui/icons-vue-taro';
 import { useGoalsStore } from '@/store/goals';
-import type { GoalPeriod } from '@/store/goals';
 import Taro, { useDidShow, useLoad } from '@tarojs/taro';
 import { useNavigationBar } from '@/utils/navigation';
+import { getToday, getThreeYearsLaterEnd, getHalfYearLaterEnd } from '@/utils/date';
 import './index.scss'
 
-const { navigationBarHeight } = useNavigationBar();
+const { statusBarHeight } = useNavigationBar();
 // 使用目标状态管理
 const goalsStore = useGoalsStore();
 
-// 期限选项
-const periodOptions = ['1个月', '3个月', '6个月', '1年'];
+// 是否为查看模式
+const isViewMode = ref(true);
+// 显示日历
+const showCalendar = ref(false);
+
+const calendarRange = ref([getToday(), getThreeYearsLaterEnd(getToday())]);
 
 // 新目标表单数据
 const newGoal = ref({
   title: '',
   targetAmount: 0,
-  periodIndex: 0,
+  currentAmount: 0,
+  startDate: getToday(),
+  endDate: getHalfYearLaterEnd(getToday()),
   description: ''
 });
 
@@ -103,53 +133,16 @@ const canCreateGoal = computed(() => {
   return newGoal.value.title.trim() && newGoal.value.targetAmount > 0;
 });
 
-// 方法
-const handlePeriodChange = (event: any) => {
-  newGoal.value.periodIndex = event.detail.value;
-};
-
-const getPeriodFromString = (periodString: string): GoalPeriod => {
-  switch (periodString) {
-    case '1个月': return 'month';
-    case '3个月': return 'quarter';
-    case '6个月': return 'half_year';
-    case '1年': return 'year';
-    default: return 'month';
-  }
-};
-
-const calculateEndDate = (period: GoalPeriod): string => {
-  const endDate = dayjs();
-  switch (period) {
-    case 'month':
-      // endDate.setMonth(endDate.getMonth() + 1);
-      endDate.add(1, 'month');
-      break;
-    case 'quarter':
-      endDate.add(3, 'month');
-      break;
-    case 'half_year':
-      endDate.add(6, 'month');
-      break;
-    case 'year':
-      endDate.add(1, 'year');
-      break;
-  }
-  return endDate.toISOString();
-};
-
 const createGoal = () => {
   if (!canCreateGoal.value) return;
   
-  const selectedPeriod = periodOptions[newGoal.value.periodIndex];
-  const periodType = getPeriodFromString(selectedPeriod);
-  
   goalsStore.addGoal({
-    title: newGoal.value.title.trim(),
+    name: newGoal.value.title.trim(),
     targetAmount: newGoal.value.targetAmount,
+    currentAmount: newGoal.value.currentAmount,
     description: newGoal.value.description.trim(),
-    period: periodType,
-    endDate: calculateEndDate(periodType)
+    startDate: newGoal.value.startDate,
+    endDate: newGoal.value.endDate
   });
   
   Taro.showToast({
@@ -167,10 +160,33 @@ const createGoal = () => {
 const goBack = () => {
   Taro.navigateBack();
 };
-useLoad(() => {
-  console.log('onLoad')
-})
+useLoad((params) => {
+  const { id } = params;
+  if (id) {
+    const goal = goalsStore.getGoal(id);
+    if (goal) {
+      newGoal.value = {
+        title: goal.name,
+        targetAmount: goal.targetAmount,
+        currentAmount: goal.currentAmount,
+        description: goal.description,
+        startDate: goal.startDate,
+        endDate: goal.endDate
+      };
+      isViewMode.value = false;
+    }
+  } else {
+    isViewMode.value = true;
+  }
+});
+
 useDidShow(() => {
-  console.log('onShow')
-})
+  // 页面显示时的逻辑
+});
+
+// 日期选择处理
+const chooseDate = (e: any) => {
+  console.log('chooseDate', e);
+};
+
 </script>

@@ -1,5 +1,4 @@
 <template>
-  <!-- <view class="header" :style="{ height: navigationBarHeight + 'px' }"></view> -->
   <view class="container">
     <view class="date-selector" :style="{ paddingTop: navigationBarHeight + 'px' }">
 

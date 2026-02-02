@@ -27,8 +27,8 @@
           <text class="progress-text">{{ goal.progress }}%</text>
           <view class="time-info">
             <Clock size="12" color="#999" class="time-icon" />
-            <text>{{ goal.period === 'month' ? '1个月' : goal.period === 'quarter' ? '3个月' : goal.period === 'half_year' ? '6个月' : '1年' }} · 
-            {{ formatDate(goal.endDate) }}</text>
+            <!-- <text>{{ goal.period === 'month' ? '1个月' : goal.period === 'quarter' ? '3个月' : goal.period === 'half_year' ? '6个月' : '1年' }} · 
+            {{ formatDate(goal.endDate) }}</text> -->
           </view>
         </view>
         
@@ -144,7 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { Clock, Success, Plus } from '@nutui/icons-vue-taro';
 import { useGoalsStore } from '@/store/goals';
 import type { SavingsGoal } from '@/store/goals';
@@ -224,14 +224,11 @@ const closeUpdateModal = () => {
   amountToAdd.value = 0;
 };
 
-// 生命周期钩子
-onMounted(() => {
-  goalsStore.loadGoals();
-});
-
 // 页面显示时更新底部栏高亮状态并刷新数据
 useDidShow(() => {
   const tabBar = getTabBarInstance();
   tabBar.updateTabbarSelectedIndex(3);
+
+  goalsStore.loadGoals();
 });
 </script>

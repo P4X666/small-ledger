@@ -1,69 +1,83 @@
-import Taro from '@tarojs/taro';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import {
+  getAllSavingsGoals,
+  createSavingsGoal,
+  updateSavingsGoal,
+  deleteSavingsGoal,
+  updateSavingsGoalAmount,
+  getSavingsGoalProgress
+} from '@/api/goals';
 
 // 目标周期类型
-export type GoalPeriod = 'month' | 'quarter' | 'half_year' | 'year';
+export type GoalPeriod = 'monthly' | 'quarterly' | 'half_yearly' | 'yearly';
+
+// 攒钱目标状态类型
+export type GoalStatus = 'in_progress' | 'completed' | 'failed';
 
 // 攒钱目标接口
 export interface SavingsGoal {
-  id: string;
-  title: string;
+  id: number;
+  name: string;
   targetAmount: number;
   currentAmount: number;
-  description?: string;
-  period: GoalPeriod;
+  description: string;
+  startDate: string;
   endDate: string;
+  status: GoalStatus;
   createdAt: string;
   updatedAt: string;
-  isCompleted: boolean;
-  progress: number;
+}
+
+export interface GoalDetail extends Omit<SavingsGoal, 'id'> {
+
 }
 
 // 目标创建数据接口
 export interface GoalCreateData {
-  title: string;
+  name: string;
   targetAmount: number;
+  currentAmount?: number;
   description?: string;
-  period: GoalPeriod;
+  startDate: string;
   endDate: string;
+  status?: GoalStatus;
 }
 
 // 目标更新数据接口
 export interface GoalUpdateData {
-  title?: string;
+  name?: string;
   targetAmount?: number;
+  currentAmount?: number;
   description?: string;
-  period?: GoalPeriod;
+  startDate?: string;
   endDate?: string;
+  status?: GoalStatus;
 }
 
 // 目标进度详情接口
-export interface GoalProgressDetails extends SavingsGoal {
-  progress: number;
-  remainingAmount: number;
-  remainingDays: number;
-  dailyContributionNeeded: number;
+export interface GoalProgressDetails {
+  id: number;
+  progressPercentage: number;
+  daysLeft: number;
+  remainingAmount?: number;
+  dailyContributionNeeded?: number;
 }
 
-// 存储键名
-const STORAGE_KEY = 'small-ledger-goals';
 
-// 生成唯一ID
-const generateId = (): string => {
-  // 使用更健壮的ID生成方式
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-};
 
 // 验证目标数据
 const validateGoalData = (data: Partial<GoalCreateData>): boolean => {
-  if (!data.title || typeof data.title !== 'string' || data.title.trim().length === 0) {
+  if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
     return false;
   }
   if (!data.targetAmount || typeof data.targetAmount !== 'number' || data.targetAmount <= 0) {
     return false;
   }
-  if (!data.period || !['month', 'quarter', 'half_year', 'year'].includes(data.period)) {
+  // if (!data.period || !['monthly', 'quarterly', 'half_yearly', 'yearly'].includes(data.period)) {
+  //   return false;
+  // }
+  if (!data.startDate || new Date(data.startDate).toString() === 'Invalid Date') {
     return false;
   }
   if (!data.endDate || new Date(data.endDate).toString() === 'Invalid Date') {
@@ -72,11 +86,18 @@ const validateGoalData = (data: Partial<GoalCreateData>): boolean => {
   return true;
 };
 
+
+
 // 创建目标状态管理
 export const useGoalsStore = defineStore('goals', () => {
   // 状态
   const goals = ref<SavingsGoal[]>([]);
   const isLoaded = ref(false);
+  const currentPage = ref(1);
+  const pageSize = ref(10);
+  const total = ref(0);
+  const isLoading = ref(false);
+  const hasMore = ref(true);
 
   // 计算属性
   
@@ -94,21 +115,29 @@ export const useGoalsStore = defineStore('goals', () => {
   // 已完成目标
   const completedGoals = computed(() => {
     return goals.value.filter(goal => 
-      goal.currentAmount >= goal.targetAmount
-    ).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      goal.currentAmount >= goal.targetAmount || goal.status === 'completed'
+    ).sort((a, b) => {
+      const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return dateB - dateA;
+    });
   });
   
   // 已过期目标
   const expiredGoals = computed(() => {
     const now = new Date();
     return goals.value.filter(goal => 
-      goal.currentAmount < goal.targetAmount && new Date(goal.endDate) <= now
+      (goal.currentAmount < goal.targetAmount && new Date(goal.endDate) <= now) || goal.status === 'failed'
     ).sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
   });
   
   // 所有目标（包括历史记录）
   const allGoals = computed(() => {
-    return goals.value.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return goals.value.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
   });
   
   // 总目标数
@@ -131,45 +160,67 @@ export const useGoalsStore = defineStore('goals', () => {
     return Math.min(Math.max(progress, 0), 100); // 确保进度在0-100之间
   };
   
-  // 从本地存储加载目标数据
-  const loadGoals = (): Promise<void> => {
-    return new Promise((resolve) => {
-      try {
-        const storedData = Taro.getStorageSync(STORAGE_KEY);
-        if (storedData) {
-          const parsedData = JSON.parse(storedData);
-          // 数据验证
-          if (Array.isArray(parsedData)) {
-            // 过滤掉无效的目标数据
-            goals.value = parsedData.filter((item: any) => {
-              return item && typeof item === 'object' &&
-                     item.id && item.title && item.targetAmount !== undefined &&
-                     item.currentAmount !== undefined && item.period && item.endDate;
-            });
-          }
-        }
-        isLoaded.value = true;
-      } catch (error) {
-        console.error('加载目标数据失败:', error);
-        goals.value = [];
-        isLoaded.value = true;
-      } finally {
-        resolve();
+  // 从API加载目标数据
+  const loadGoals = async (reset = true): Promise<void> => {
+    if (reset) {
+      currentPage.value = 1;
+      goals.value = [];
+      hasMore.value = true;
+    }
+    
+    if (!hasMore.value || isLoading.value) {
+      return;
+    }
+    
+    isLoading.value = true;
+    try {
+      // 调用API获取带分页的数据
+      const params = {
+        page: currentPage.value,
+        limit: pageSize.value,
+        sortBy: 'createdAt',
+        order: 'DESC'
+      };
+      const response = await getAllSavingsGoals(params);
+      const { data } = response;
+      console.log(data,`
+        
+        
+        
+        data`);
+      
+      // 处理数据，添加进度字段
+      const processedData = data.data.map(goal => ({
+        ...goal,
+        progress: calculateProgress(goal)
+      })) || [];
+      
+      
+      if (reset) {
+        goals.value = processedData;
+      } else {
+        goals.value = [...goals.value, ...processedData];
       }
-    });
+      
+      // 更新分页信息
+      total.value = data.meta.totalItems;
+      hasMore.value = goals.value.length < total.value;
+      currentPage.value += 1;
+      isLoaded.value = true;
+    } catch (error) {
+      console.error('加载目标数据失败:', error);
+      if (reset) {
+        goals.value = [];
+      }
+      isLoaded.value = true;
+    } finally {
+      isLoading.value = false;
+    }
   };
   
-  // 保存目标数据到本地存储
-  const saveGoals = (): Promise<boolean> => {
-    return new Promise((resolve) => {
-      try {
-        Taro.setStorageSync(STORAGE_KEY, JSON.stringify(goals.value));
-        resolve(true);
-      } catch (error) {
-        console.error('保存目标数据失败:', error);
-        resolve(false);
-      }
-    });
+  // 加载更多目标数据
+  const loadMoreGoals = async (): Promise<void> => {
+    await loadGoals(false);
   };
   
   // 操作方法
@@ -181,37 +232,22 @@ export const useGoalsStore = defineStore('goals', () => {
       return null;
     }
     
-    const now = new Date().toISOString();
-    
-    const newGoal: SavingsGoal = {
-      id: generateId(),
-      title: goalData.title.trim(),
-      targetAmount: goalData.targetAmount,
-      currentAmount: 0,
-      description: goalData.description?.trim() || '',
-      period: goalData.period,
-      endDate: goalData.endDate,
-      createdAt: now,
-      updatedAt: now,
-      isCompleted: false,
-      progress: 0
-    };
-    
-    goals.value.push(newGoal);
-    const saved = await saveGoals();
-    
-    if (!saved) {
-      // 保存失败，回滚操作
-      goals.value.pop();
-      console.error('创建目标失败');
+    try {
+      const newGoal = await createSavingsGoal(goalData);
+      const goalWithProgress = {
+        ...newGoal,
+        progress: calculateProgress(newGoal)
+      };
+      goals.value.push(goalWithProgress);
+      return goalWithProgress;
+    } catch (error) {
+      console.error('创建目标失败:', error);
       return null;
     }
-    
-    return newGoal;
   };
   
   // 更新目标信息
-  const updateGoal = async (goalId: string, updateData: GoalUpdateData): Promise<boolean> => {
+  const updateGoal = async (goalId: string | number, updateData: GoalUpdateData): Promise<boolean> => {
     const index = goals.value.findIndex(goal => goal.id === goalId);
     
     if (index === -1) {
@@ -220,7 +256,7 @@ export const useGoalsStore = defineStore('goals', () => {
     }
     
     // 如果更新的字段包含关键信息，进行验证
-    if (updateData.title || updateData.targetAmount || updateData.period || updateData.endDate) {
+    if (updateData.name || updateData.targetAmount || updateData.startDate || updateData.endDate) {
       const validationData: Partial<GoalCreateData> = {
         ...goals.value[index],
         ...updateData
@@ -232,26 +268,22 @@ export const useGoalsStore = defineStore('goals', () => {
       }
     }
     
-    const updatedGoal = {
-      ...goals.value[index],
-      ...updateData,
-      updatedAt: new Date().toISOString()
-    };
-    
-    // 更新字段处理
-    if (updatedGoal.title) {
-      updatedGoal.title = updatedGoal.title.trim();
+    try {
+      const updatedGoal = await updateSavingsGoal(goalId, updateData);
+      const goalWithProgress = {
+        ...updatedGoal,
+        progress: calculateProgress(updatedGoal)
+      };
+      goals.value[index] = goalWithProgress;
+      return true;
+    } catch (error) {
+      console.error('更新目标失败:', error);
+      return false;
     }
-    if (updatedGoal.description) {
-      updatedGoal.description = updatedGoal.description.trim();
-    }
-    
-    goals.value[index] = updatedGoal;
-    return await saveGoals();
   };
   
   // 更新目标金额（增加）
-  const updateGoalAmount = async (goalId: string, amountToAdd: number): Promise<boolean> => {
+  const updateGoalAmount = async (goalId: string | number, amountToAdd: number): Promise<boolean> => {
     if (typeof amountToAdd !== 'number' || amountToAdd <= 0) {
       console.error('金额必须是正数');
       return false;
@@ -259,68 +291,91 @@ export const useGoalsStore = defineStore('goals', () => {
     
     const index = goals.value.findIndex(goal => goal.id === goalId);
     
-    if (index !== -1) {
-      goals.value[index].currentAmount += amountToAdd;
-      goals.value[index].updatedAt = new Date().toISOString();
-      
-      return await saveGoals();
+    if (index === -1) {
+      console.error('目标不存在');
+      return false;
     }
     
-    console.error('目标不存在');
-    return false;
+    try {
+      const currentAmount = goals.value[index].currentAmount;
+      const updatedAmount = currentAmount + amountToAdd;
+      const updatedGoal = await updateSavingsGoalAmount(goalId, updatedAmount);
+      const goalWithProgress = {
+        ...updatedGoal,
+        progress: calculateProgress(updatedGoal)
+      };
+      goals.value[index] = goalWithProgress;
+      return true;
+    } catch (error) {
+      console.error('更新目标金额失败:', error);
+      return false;
+    }
   };
   
   // 删除目标
-  const deleteGoal = async (goalId: string): Promise<boolean> => {
+  const deleteGoal = async (goalId: string | number): Promise<boolean> => {
     const index = goals.value.findIndex(goal => goal.id === goalId);
     
-    if (index !== -1) {
-      const deletedGoal = goals.value.splice(index, 1);
-      const saved = await saveGoals();
-      
-      if (!saved) {
-        // 保存失败，回滚操作
-        goals.value.splice(index, 0, ...deletedGoal);
-        console.error('删除目标失败');
-        return false;
-      }
-      
-      return true;
+    if (index === -1) {
+      console.error('目标不存在');
+      return false;
     }
     
-    console.error('目标不存在');
-    return false;
+    try {
+      await deleteSavingsGoal(goalId);
+      goals.value.splice(index, 1);
+      return true;
+    } catch (error) {
+      console.error('删除目标失败:', error);
+      return false;
+    }
   };
   
   // 获取单个目标
-  const getGoal = (goalId: string): SavingsGoal | undefined => {
-    return goals.value.find(goal => goal.id === goalId);
+  const getGoal = (goalId: string | number): SavingsGoal | undefined => {
+    const currentGoal = goals.value.find(goal => goal.id === goalId);
+    return currentGoal;
   };
   
   // 根据周期获取目标
-  const getGoalsByPeriod = (period: GoalPeriod): SavingsGoal[] => {
-    return goals.value.filter(goal => goal.period === period);
-  };
+  // const getGoalsByPeriod = (period: GoalPeriod): SavingsGoal[] => {
+  //   return goals.value.filter(goal => goal.period === period);
+  // };
   
   // 获取目标进度详情
-  const getGoalProgressDetails = (goalId: string): GoalProgressDetails | null => {
+  const getGoalProgressDetails = async (goalId: string | number): Promise<GoalProgressDetails | null> => {
     const goal = getGoal(goalId);
     if (!goal) {
       console.error('目标不存在');
       return null;
     }
     
-    const progress = calculateProgress(goal);
-    const remainingAmount = goal.targetAmount - goal.currentAmount;
-    const remainingDays = Math.ceil((new Date(goal.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    
-    return {
-      ...goal,
-      progress,
-      remainingAmount: Math.max(0, remainingAmount),
-      remainingDays: Math.max(0, remainingDays),
-      dailyContributionNeeded: remainingDays > 0 ? remainingAmount / remainingDays : 0
-    };
+    try {
+      const progressDetails = await getSavingsGoalProgress(goalId);
+      // 计算额外的进度信息
+      const remainingAmount = goal.targetAmount - goal.currentAmount;
+      const remainingDays = Math.ceil((new Date(goal.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      
+      return {
+        ...progressDetails,
+        remainingAmount: Math.max(0, remainingAmount),
+        dailyContributionNeeded: remainingDays > 0 ? remainingAmount / remainingDays : 0
+      };
+    } catch (error) {
+      console.error('获取目标进度失败:', error);
+      // 降级处理，本地计算进度
+      const progress = calculateProgress(goal);
+      const remainingAmount = goal.targetAmount - goal.currentAmount;
+      const remainingDays = Math.ceil((new Date(goal.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      
+      return {
+        id: goal.id,
+        progressPercentage: progress,
+        daysLeft: Math.max(0, remainingDays),
+        remainingAmount: Math.max(0, remainingAmount),
+        dailyContributionNeeded: remainingDays > 0 ? remainingAmount / remainingDays : 0
+      };
+    }
   };
   
   // 获取总体攒钱统计
@@ -342,28 +397,19 @@ export const useGoalsStore = defineStore('goals', () => {
   // 重置所有数据（用于调试）
   const resetGoals = async (): Promise<boolean> => {
     goals.value = [];
-    return await saveGoals();
-  };
-  
-  // 清空已完成的目标
-  const clearCompletedGoals = async (): Promise<boolean> => {
-    const initialLength = goals.value.length;
-    goals.value = goals.value.filter(goal => goal.currentAmount < goal.targetAmount);
-    
-    if (goals.value.length !== initialLength) {
-      return await saveGoals();
-    }
     return true;
   };
-  
-  // 初始化时加载数据
-  loadGoals();
   
   // 暴露状态和方法
   return {
     // 状态
     goals,
     isLoaded,
+    currentPage,
+    pageSize,
+    total,
+    isLoading,
+    hasMore,
     
     // 计算属性
     activeGoals,
@@ -377,15 +423,15 @@ export const useGoalsStore = defineStore('goals', () => {
     
     // 方法
     loadGoals,
+    loadMoreGoals,
     addGoal,
     updateGoal,
     updateGoalAmount,
     deleteGoal,
     getGoal,
-    getGoalsByPeriod,
+    // getGoalsByPeriod,
     getGoalProgressDetails,
     getSavingsStats,
     resetGoals,
-    clearCompletedGoals
   };
 });
