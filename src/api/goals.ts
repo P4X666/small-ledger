@@ -29,7 +29,7 @@ export const getAllSavingsGoals = async (params: {
       showLoading: true,
       loadingTitle: '加载攒钱目标中...'
     });
-  return response.data;
+  return response.data.data;
 };
 
 /**

@@ -181,14 +181,7 @@ export const useGoalsStore = defineStore('goals', () => {
         sortBy: 'createdAt',
         order: 'DESC'
       };
-      const response = await getAllSavingsGoals(params);
-      const { data } = response;
-      console.log(data,`
-        
-        
-        
-        data`);
-      
+      const data = await getAllSavingsGoals(params);
       // 处理数据，添加进度字段
       const processedData = data.data.map(goal => ({
         ...goal,

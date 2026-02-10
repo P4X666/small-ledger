@@ -1,8 +1,17 @@
 // ESLint 检查 .vue 文件需要单独配置编辑器：
 // https://eslint.vuejs.org/user-guide/#editor-integrations
 {
+  "root": true,
   "extends": ["taro/vue3"],
-  "parser": "@typescript-eslint/parser",
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    // 2. 在 parserOptions 中指定 TypeScript 解析器
+    "parser": "@typescript-eslint/parser",
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    // 3. 支持 .vue 文件扩展名
+    "extraFileExtensions": [".vue"]
+  },
   "plugins": ["@typescript-eslint"],
   "settings": {
     "import/resolver": {
