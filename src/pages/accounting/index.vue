@@ -57,7 +57,7 @@
     <!-- 记账记录列表 -->
     <view class="records-section">
       <view class="section-header">
-        <text class="section-title">本月记录</text>
+        <text class="section-title">本{{ dateStatisticDes }}记录</text>
         <text class="record-count">{{ filteredRecords.length }}条记录</text>
       </view>
       <view class="records-list">
@@ -68,7 +68,7 @@
         
         <!-- 空状态 -->
         <view v-else-if="filteredRecords.length === 0" class="empty-state">
-          <text class="empty-text">本月暂无记账记录</text>
+          <text class="empty-text">本{{ dateStatisticDes }}暂无记账记录</text>
           <button @tap="navigateToAddRecord" class="empty-add-btn">
             <Plus size="16" color="currentColor" />
             <text>添加第一条记录</text>
@@ -127,13 +127,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { Date as DateIcon, RectDown, Plus, Minus, ArrowRight, TriangleUp, TriangleDown } from '@nutui/icons-vue-taro';
 import { useAccountingStore } from '@/store/accounting';
 import Taro, { useDidShow, useLoad } from '@tarojs/taro';
 import { useNavigationBar } from '@/utils/navigation';
 import { getTabBarInstance } from '@/utils/tab-bar';
-import { getToday, getWeekStart, getWeekEnd, getLastYearStart } from '@/utils/date';
+import { getToday, getWeekStart, getWeekEnd, getLastYearStart, getMonthStart, getMonthEnd, getYearStart, getYearEnd } from '@/utils/date';
 import { CALENDAR_TYPE } from '@/constants/common';
 import dayjs from 'dayjs';
 import type { AccountingRecord } from '@/store/accounting'
@@ -245,6 +245,31 @@ useLoad(async () => {
   setCurrentMonth();
 });
 
+const loadData = async () => {
+  const params = {
+    startDate: '',
+    endDate: ''
+  } 
+  if(calendarType.value === CALENDAR_TYPE.WEEK){
+    params.startDate = currentWeek.value[0];
+    params.endDate = currentWeek.value[1];
+  }
+  if(calendarType.value === CALENDAR_TYPE.MONTH){
+    params.startDate = getMonthStart(getToday());
+    params.endDate = getMonthEnd(getToday());
+  }
+  if(calendarType.value === CALENDAR_TYPE.YEAR){
+    params.startDate = getYearStart(getToday());
+    params.endDate = getYearEnd(getToday());
+  }
+  accountingStore.loadRecords(params);
+  accountingStore.loadStatistics(params);
+}
+
+watchEffect(() => {
+  loadData()
+})
+
 const tabBarHeight = ref('60rpx');
 // 页面显示时更新底部栏高亮状态并刷新数据
 useDidShow(async () => {
@@ -253,8 +278,6 @@ useDidShow(async () => {
   tabBarHeight.value = tabBar.tabBarHeight;
   console.log('accounting page did show');
   
-  // 刷新数据
-  accountingStore.loadRecords();
-  accountingStore.loadStatistics();
+  loadData()
 });
 </script>

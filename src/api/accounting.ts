@@ -32,13 +32,18 @@ interface TransactionStatisticsResponse {
   }>;
 }
 
+export interface TransactionStatisticsParams {
+  startDate?: string;
+  endDate?: string;
+}
+
 /**
  * 获取所有交易记录
  * @returns 交易记录列表
  */
-export const getTransactions = async (): Promise<TransactionListResponse> => {
+export const getTransactions = async (params: TransactionStatisticsParams): Promise<TransactionListResponse> => {
   try {
-    const response = await get('/api/transactions', {}, {
+    const response = await get('/api/transactions', params, {
       showLoading: true,
       loadingTitle: '加载交易记录中...'
     });
@@ -121,9 +126,9 @@ export const deleteTransaction = async (id: string): Promise<boolean> => {
  * 获取交易统计信息
  * @returns 交易统计信息
  */
-export const getTransactionStatistics = async (): Promise<TransactionStatisticsResponse> => {
+export const getTransactionStatistics = async (params: TransactionStatisticsParams): Promise<TransactionStatisticsResponse> => {
   try {
-    const response = await get('/api/transactions/statistics', {}, {
+    const response = await get('/api/transactions/statistics', params, {
       showLoading: true,
       loadingTitle: '加载统计信息中...'
     });

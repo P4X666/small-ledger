@@ -43,22 +43,13 @@ export const useAccountingStore = defineStore('accounting', () => {
   };
   
   // 方法：从API加载记账记录
-  const loadRecords = async () => {
+  const loadRecords = async (params: accountingApi.TransactionStatisticsParams) => {
     try {
       isLoading.value = true;
-      const fetchedRecords = await accountingApi.getTransactions();
+      const fetchedRecords = await accountingApi.getTransactions(params);
       total.value = fetchedRecords.meta.totalItems
       // 数据格式验证
       if (Array.isArray(fetchedRecords.data)) {
-        // transactionDate
-        // const newData:AccountingRecord[] = []
-        // fetchedRecords.data.forEach(item=>{
-        //   const newItem = {...item}
-        //   if(item.transactionDate){
-        //     newItem.transactionDate = dayjs(item.transactionDate).format('YYYY年MM月DD日 HH:mm:ss')
-        //   }
-        //   newData.push(newItem)
-        // })
         records.value = fetchedRecords.data;
       } else {
         console.error('记账记录数据格式错误');
@@ -73,9 +64,9 @@ export const useAccountingStore = defineStore('accounting', () => {
   };
   
   // 方法：加载统计信息
-  const loadStatistics = async () => {
+  const loadStatistics = async (params: accountingApi.TransactionStatisticsParams) => {
     try {
-      const stats = await accountingApi.getTransactionStatistics();
+      const stats = await accountingApi.getTransactionStatistics(params);
       statistics.value = stats;
     } catch (error) {
       console.error('加载统计信息失败:', error);
@@ -132,8 +123,6 @@ export const useAccountingStore = defineStore('accounting', () => {
       const index = records.value.findIndex(record => record.id === recordId);
       if (index !== -1) {
         records.value[index] = updatedRecord;
-        // 更新统计信息
-        await loadStatistics();
         return updatedRecord;
       }
       return null;
@@ -152,8 +141,6 @@ export const useAccountingStore = defineStore('accounting', () => {
       if (success) {
         // 使用filter创建新数组，提高响应式性能
         records.value = records.value.filter(record => record.id !== recordId);
-        // 更新统计信息
-        await loadStatistics();
         return true;
       }
       return false;
@@ -264,8 +251,6 @@ export const useAccountingStore = defineStore('accounting', () => {
       if (allSuccess) {
         // 更新本地记录
         records.value = records.value.filter(record => !recordIds.includes(record.id));
-        // 更新统计信息
-        await loadStatistics();
         return true;
       }
       return false;
