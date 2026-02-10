@@ -55,12 +55,13 @@ const tabList: TabItem[] = [
     defaultIcon: '/assets/images/record.svg', 
     activeIcon: '/assets/images/record-active.svg' 
   },
-  { 
-    pagePath: '/pages/goals/index', 
-    text: '目标', 
-    defaultIcon: '/assets/images/target.svg', 
-    activeIcon: '/assets/images/target-active.svg' 
-  } 
+  // TODO: 目标功能暂未实现
+  // { 
+  //   pagePath: '/pages/goals/index', 
+  //   text: '目标', 
+  //   defaultIcon: '/assets/images/target.svg', 
+  //   activeIcon: '/assets/images/target-active.svg' 
+  // } 
 ];
 
 // 当前选中的索引
