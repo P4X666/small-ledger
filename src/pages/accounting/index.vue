@@ -1,6 +1,15 @@
 <template>
+  <nut-navbar 
+    title="账单管理" 
+    fixed 
+    placeholder 
+    safe-area-inset-top 
+    z-index="999"
+    class="custom-navbar"
+    :style="{ '--status-bar-height': statusBarHeight + 'px' }"
+  ></nut-navbar>
   <view class="container">
-    <view class="date-selector" :style="{ paddingTop: navigationBarHeight + 'px' }">
+    <view class="date-selector">
 
       <view class="date-view">{{ getDateFilterMessage() }}</view>
       <nut-radio-group v-model="calendarType" direction="horizontal">
@@ -9,11 +18,11 @@
         </template>
       </nut-radio-group>
     </view>
-    <view class="date-detail" @tap="showCalendar = true">
-        <DateIcon size="16" />
-        <text class="date-text">{{ currentDate }}</text>
-        <RectDown size="14" />
-      </view>
+    <!-- <view class="date-detail" @tap="showCalendar = true">
+      <DateIcon size="16" />
+      <text class="date-text">{{ currentDate }}</text>
+      <RectDown size="14" />
+    </view> -->
     <!-- 收支概览 -->
     <view class="overview-card">
       <view class="overview-header">
@@ -58,16 +67,16 @@
     <view class="records-section">
       <view class="section-header">
         <text class="section-title">本{{ dateStatisticDes }}记录</text>
-        <text class="record-count">{{ filteredRecords.length }}条记录</text>
+        <text class="record-count">{{ total }}条记录</text>
       </view>
       <view class="records-list">
         <!-- 加载状态 -->
-        <view v-if="accountingStore.isLoading" class="loading-state">
+        <!-- <view v-if="accountingStore.isLoading" class="loading-state">
           <text class="loading-text">加载中...</text>
-        </view>
+        </view> -->
         
         <!-- 空状态 -->
-        <view v-else-if="filteredRecords.length === 0" class="empty-state">
+        <view v-if="filteredRecords.length === 0" class="empty-state">
           <text class="empty-text">本{{ dateStatisticDes }}暂无记账记录</text>
           <button @tap="navigateToAddRecord" class="empty-add-btn">
             <Plus size="16" color="currentColor" />
@@ -106,6 +115,7 @@
             <ArrowRight size="16" color="var(--text-tertiary)" />
           </view>
         </view>
+        <ListLoading v-if="filteredRecords.length !== 0" :isEnd="isEnd"  />
         <view :style="{ height: tabBarHeight }"></view>
       </view>
     </view>
@@ -127,10 +137,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, watchEffect, watch } from 'vue';
 import { Date as DateIcon, RectDown, Plus, Minus, ArrowRight, TriangleUp, TriangleDown } from '@nutui/icons-vue-taro';
 import { useAccountingStore } from '@/store/accounting';
-import Taro, { useDidShow, useLoad } from '@tarojs/taro';
+import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
 import { useNavigationBar } from '@/utils/navigation';
 import { getTabBarInstance } from '@/utils/tab-bar';
 import { getToday, getWeekStart, getWeekEnd, getLastYearStart, getMonthStart, getMonthEnd, getYearStart, getYearEnd } from '@/utils/date';
@@ -139,7 +149,7 @@ import dayjs from 'dayjs';
 import type { AccountingRecord } from '@/store/accounting'
 import './index.scss'
 
-const { navigationBarHeight } = useNavigationBar();
+const { statusBarHeight } = useNavigationBar();
 // 使用记账状态管理
 const accountingStore = useAccountingStore();
 
@@ -245,7 +255,7 @@ useLoad(async () => {
   setCurrentMonth();
 });
 
-const loadData = async () => {
+const loadData = async (reset = false, getStatistics = false) => {
   const params = {
     startDate: '',
     endDate: ''
@@ -262,12 +272,30 @@ const loadData = async () => {
     params.startDate = getYearStart(getToday());
     params.endDate = getYearEnd(getToday());
   }
-  accountingStore.loadRecords(params);
-  accountingStore.loadStatistics(params);
+  accountingStore.loadRecords(params, reset);
+  if(getStatistics){
+    accountingStore.loadStatistics(params, reset);
+  }
 }
 
-watchEffect(() => {
-  loadData()
+watch(() => calendarType.value, (newValue, oldValue) => {
+  console.log('watch', newValue, oldValue);
+  loadData(true, true)
+})
+
+const isEnd = computed(() => accountingStore.isEnd);
+const total = computed(() => accountingStore.total);
+
+useReachBottom(()=>{
+  console.log('isEnd', isEnd.value);
+  if(!isEnd.value){
+    console.log('reach bottom');
+    loadData()
+  }
+})
+
+useLoad(() => {
+  loadData(true, true)
 })
 
 const tabBarHeight = ref('60rpx');
@@ -277,7 +305,5 @@ useDidShow(async () => {
   tabBar.updateTabbarSelectedIndex(2);
   tabBarHeight.value = tabBar.tabBarHeight;
   console.log('accounting page did show');
-  
-  loadData()
 });
 </script>

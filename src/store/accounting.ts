@@ -25,7 +25,9 @@ export interface AccountingRecord {
 export const useAccountingStore = defineStore('accounting', () => {
   // 状态
   const records = ref<AccountingRecord[]>([]);
+  const currentPage = ref(1);
   const isLoading = ref(false);
+  const isEnd = ref(false);
   const statistics = ref<{
     totalIncome: number;
     totalExpense: number;
@@ -43,14 +45,31 @@ export const useAccountingStore = defineStore('accounting', () => {
   };
   
   // 方法：从API加载记账记录
-  const loadRecords = async (params: accountingApi.TransactionStatisticsParams) => {
+  const loadRecords = async (params: accountingApi.TransactionStatisticsParams, reset = false) => {
+    if(isLoading.value){
+      return;
+    }
+    // currentPage.value = params.page || 1;
+    if(reset){
+      records.value = [];
+      isEnd.value = false;
+      currentPage.value = 1;
+    }
+    if(isEnd.value){
+      return;
+    }
     try {
       isLoading.value = true;
-      const fetchedRecords = await accountingApi.getTransactions(params);
+      const fetchedRecords = await accountingApi.getTransactions({
+        ...params,
+        page: currentPage.value,
+      });
       total.value = fetchedRecords.meta.totalItems
       // 数据格式验证
       if (Array.isArray(fetchedRecords.data)) {
-        records.value = fetchedRecords.data;
+        const data = [...records.value, ...fetchedRecords.data]
+        records.value = data;
+        isEnd.value = data.length >= total.value;
       } else {
         console.error('记账记录数据格式错误');
         records.value = [];
@@ -60,11 +79,15 @@ export const useAccountingStore = defineStore('accounting', () => {
       records.value = [];
     } finally {
       isLoading.value = false;
+      currentPage.value++;
     }
   };
   
   // 方法：加载统计信息
-  const loadStatistics = async (params: accountingApi.TransactionStatisticsParams) => {
+  const loadStatistics = async (params: accountingApi.TransactionStatisticsParams, reset = false) => {
+    if(reset){
+      statistics.value = { totalIncome: 0, totalExpense: 0, totalNeutral: 0, balance: 0, monthlySummary: {} };
+    }
     try {
       const stats = await accountingApi.getTransactionStatistics(params);
       statistics.value = stats;
@@ -278,7 +301,9 @@ export const useAccountingStore = defineStore('accounting', () => {
     // 状态
     records,
     isLoading,
+    isEnd,
     statistics,
+    total,
     
     // 方法
     loadRecords,

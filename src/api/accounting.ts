@@ -35,6 +35,7 @@ interface TransactionStatisticsResponse {
 export interface TransactionStatisticsParams {
   startDate?: string;
   endDate?: string;
+  page?: number;
 }
 
 /**
