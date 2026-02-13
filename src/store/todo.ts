@@ -106,6 +106,9 @@ export const useTodoStore = defineStore('todo', () => {
         ...customParams
       }
       const fetchedTasks = await getAllTasks(allParams);
+      if(!fetchedTasks){
+        return [];
+      }
       fetchedTasks.data.forEach(task => {
         addTaskHandle(task);
       });
@@ -132,6 +135,9 @@ export const useTodoStore = defineStore('todo', () => {
         page: 1,
         limit: 10
       });
+      if(!fetchedTasks){
+        return [];
+      }
       return fetchedTasks.data;
     } catch (err: any) {
       Taro.showToast({

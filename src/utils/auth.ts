@@ -1,3 +1,5 @@
+import Taro from "@tarojs/taro";
+
 export const decodeJWT = (token: string): { exp?: number } => {
   try {
     const base64Url = token.split('.')[1];
@@ -20,8 +22,6 @@ export const isTokenExpired = (token: string): boolean => {
   if (!decoded.exp) return true;
   return Date.now() >= decoded.exp * 1000;
 };
-
-import Taro from "@tarojs/taro";
 
 // 防止重复跳转标志
 let isRedirecting = false;

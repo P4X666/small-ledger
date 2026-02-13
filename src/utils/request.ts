@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro';
 import { getBaseUrl } from './base-url';
 import { redirectToLogin } from '@/utils/auth';
+import { getToken } from './token';
 
 // API基础URL
 const BASE_URL = getBaseUrl();
@@ -48,6 +49,19 @@ interface RequestOptions extends Taro.request.Option {
   loadingMask?: boolean;
 }
 
+interface CommonResponse extends Omit<Taro.request.SuccessCallbackResult, 'errMsg'> {
+  statusCode: number;
+  data: ResponseData;
+  header: Record<string, any>;
+  cookies: string[] | undefined;
+}
+
+export interface ResponseError {
+  code: number;
+  message: string;
+  response?: CommonResponse;
+}
+
 let loading = false;
 /**
  * Taro.request Promise封装
@@ -69,7 +83,7 @@ export const request = (options: RequestOptions): Promise<any> => {
   };
 
   // 获取本地存储的Token
-  const token = Taro.getStorageSync('token');
+  const token = getToken();
   if (token) {
     config.header = {
       ...config.header,
@@ -95,7 +109,7 @@ export const request = (options: RequestOptions): Promise<any> => {
         const { statusCode, data, header, cookies } = res;
         
         // 标准化响应数据
-        const response = {
+        const response: CommonResponse = {
           statusCode,
           data: data as ResponseData,
           header,
@@ -109,7 +123,7 @@ export const request = (options: RequestOptions): Promise<any> => {
         } else {
           // 请求失败，reject标准化错误信息
           const errorMsg = (data as any).message || `请求失败，状态码：${statusCode}`;
-          const error = {
+          const error: ResponseError = {
             code: statusCode,
             message: errorMsg,
             response

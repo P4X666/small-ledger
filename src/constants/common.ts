@@ -68,3 +68,6 @@ export enum CALENDAR_TYPE {
   WEEK= 'week',
   DAY= 'day',
 };
+
+
+export const IMPORT_BILL_URL = '/statics/html/import-bill.html';

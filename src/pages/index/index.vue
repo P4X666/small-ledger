@@ -94,12 +94,12 @@
         <text class="action-text">日常记账</text>
       </view>
       
-      <view class="quick-action" @click="navigateTo('/pages/goal/index')">
+      <!-- <view class="quick-action" @click="navigateTo('/pages/goal/index')">
         <view class="quick-action-icon goal">
           <text class="icon-text">目标</text>
         </view>
         <text class="action-text">目标管理</text>
-      </view>
+      </view> -->
     </view>
   </view>
 </template>
@@ -152,6 +152,9 @@ const loadTasks = async () => {
     importantInProgressTasks.value = res
   })
   todoStore.getTasksStatistics().then(res=>{
+    if(!res){
+      return
+    }
     const {inProgressTasksTotal = 0, highPriorityTasksTotal = 0} = res
     statistics.value = {inProgressTasksTotal, highPriorityTasksTotal}
   })

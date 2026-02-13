@@ -31,7 +31,7 @@ interface TaskListResponse extends CommonListResponseData {
  * 获取所有任务
  * @returns 任务列表
  */
-export const getAllTasks = async (params={} as TaskListParams): Promise<TaskListResponse> => {
+export const getAllTasks = async (params={} as TaskListParams): Promise<TaskListResponse | undefined> => {
   try {
     const response = await get('/api/tasks', params, {
       showLoading: true,
@@ -39,7 +39,10 @@ export const getAllTasks = async (params={} as TaskListParams): Promise<TaskList
     });
     return response.data.data;
   } catch (error: any) {
-    throw new Error(error.message || '获取任务列表失败');
+    if(error.code !== 401){
+      throw new Error(error.message || '获取任务列表失败');
+    }
+    return undefined;
   }
 };
 
@@ -52,7 +55,7 @@ interface TasksStatistics {
  * 获取所有任务统计
  * @returns {}
  */
-export const getTasksNum = async (): Promise<TasksStatistics> => {
+export const getTasksNum = async (): Promise<TasksStatistics | undefined> => {
   try {
     const response = await get('/api/tasks/getTasksNum', {}, {
       showLoading: true,
@@ -60,7 +63,10 @@ export const getTasksNum = async (): Promise<TasksStatistics> => {
     });
     return response.data.data;
   } catch (error: any) {
-    throw new Error(error.message || '获取任务列表失败');
+    if(error.code !== 401){
+      throw new Error(error.message || '获取任务统计失败');
+    }
+    return undefined;
   }
 };
 

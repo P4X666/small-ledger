@@ -78,10 +78,16 @@
         <!-- 空状态 -->
         <view v-if="filteredRecords.length === 0" class="empty-state">
           <text class="empty-text">本{{ dateStatisticDes }}暂无记账记录</text>
-          <button @tap="navigateToAddRecord" class="empty-add-btn">
+          <!-- <button @tap="navigateToAddRecord" class="empty-add-btn">
             <Plus size="16" color="currentColor" />
             <text>添加第一条记录</text>
-          </button>
+          </button> -->
+          <view>
+            <view>导入账单excel：</view>
+            <view @tap="copyImportBillUrl" class="import-bill-url">
+              请点击我复制账单地址并到浏览器中打开
+            </view>
+          </view>
         </view>
         
         <!-- 记录列表 -->
@@ -144,9 +150,11 @@ import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
 import { useNavigationBar } from '@/utils/navigation';
 import { getTabBarInstance } from '@/utils/tab-bar';
 import { getToday, getWeekStart, getWeekEnd, getLastYearStart, getMonthStart, getMonthEnd, getYearStart, getYearEnd } from '@/utils/date';
-import { CALENDAR_TYPE } from '@/constants/common';
+import { CALENDAR_TYPE, IMPORT_BILL_URL } from '@/constants/common';
 import dayjs from 'dayjs';
 import type { AccountingRecord } from '@/store/accounting'
+import { getBaseUrl } from '@/utils/base-url';
+import { getToken } from '@/utils/token';
 import './index.scss'
 
 const { statusBarHeight } = useNavigationBar();
@@ -297,6 +305,20 @@ useReachBottom(()=>{
 useLoad(() => {
   loadData(true, true)
 })
+
+const importBillUrl = getBaseUrl() + IMPORT_BILL_URL+'?token='+getToken()
+
+const copyImportBillUrl = () => {
+  Taro.setClipboardData({
+    data: importBillUrl,
+    success: () => {
+      Taro.showToast({
+        title: '已复制',
+        icon: 'success'
+      });
+    }
+  });
+}
 
 const tabBarHeight = ref('60rpx');
 // 页面显示时更新底部栏高亮状态并刷新数据
