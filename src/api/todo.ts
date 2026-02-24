@@ -35,7 +35,7 @@ export const getAllTasks = async (params={} as TaskListParams): Promise<TaskList
   try {
     const response = await get('/api/tasks', params, {
       showLoading: true,
-      loadingTitle: '加载任务中...'
+      loadingTitle: '数据加载中...'
     });
     return response.data.data;
   } catch (error: any) {
@@ -59,7 +59,7 @@ export const getTasksNum = async (): Promise<TasksStatistics | undefined> => {
   try {
     const response = await get('/api/tasks/getTasksNum', {}, {
       showLoading: true,
-      loadingTitle: '加载任务中...'
+      loadingTitle: '数据加载中...'
     });
     return response.data.data;
   } catch (error: any) {
@@ -165,7 +165,7 @@ export const getTasksByTimePeriod = async (period: TimePeriod): Promise<Task[]> 
   try {
     const response = await get(`/api/tasks/by-time/${period}`, {}, {
       showLoading: true,
-      loadingTitle: '加载任务中...'
+      loadingTitle: '数据加载中...'
     });
     return response.data.data;
   } catch (error: any) {

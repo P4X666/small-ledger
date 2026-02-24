@@ -131,7 +131,12 @@ const handleLogin = async () => {
         });
         loading.value = false;
       } catch (error: any) {
-        openToast('fail', error.message || '登录失败，请重试');
+        // 处理登录错误
+        if(error.message === "Invalid credentials"){
+          openToast('fail', '用户名或密码错误');
+        } else {
+          openToast('fail', error.message || '登录失败，请重试');
+        }
         // 关闭加载状态
         loading.value = false;
       }

@@ -143,10 +143,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watchEffect, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
+import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
 import { Date as DateIcon, RectDown, Plus, Minus, ArrowRight, TriangleUp, TriangleDown } from '@nutui/icons-vue-taro';
 import { useAccountingStore } from '@/store/accounting';
-import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
 import { useNavigationBar } from '@/utils/navigation';
 import { getTabBarInstance } from '@/utils/tab-bar';
 import { getToday, getWeekStart, getWeekEnd, getLastYearStart, getMonthStart, getMonthEnd, getYearStart, getYearEnd } from '@/utils/date';
