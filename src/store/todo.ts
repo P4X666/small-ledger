@@ -139,7 +139,7 @@ export const useTodoStore = defineStore('todo', () => {
         return [];
       }
       return fetchedTasks.data;
-    } catch (err: any) {
+    } catch {
       Taro.showToast({
         title: error.value || '加载任务失败',
         icon: 'none',

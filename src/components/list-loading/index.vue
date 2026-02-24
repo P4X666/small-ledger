@@ -18,7 +18,7 @@ defineOptions({
     name: 'ListLoading',
 });
 
-const props = defineProps({
+defineProps({
     isEnd: {
         type: Boolean,
         default: false

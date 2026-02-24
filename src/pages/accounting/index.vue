@@ -13,7 +13,7 @@
 
       <view class="date-view">{{ getDateFilterMessage() }}</view>
       <nut-radio-group v-model="calendarType" direction="horizontal">
-        <template v-for="option in transactionViewOptions">
+        <template v-for="option in transactionViewOptions" :key="option.value">
           <nut-radio :label="option.value">{{ option.label }}</nut-radio>
         </template>
       </nut-radio-group>
@@ -145,7 +145,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
-import { Date as DateIcon, RectDown, Plus, Minus, ArrowRight, TriangleUp, TriangleDown } from '@nutui/icons-vue-taro';
+import { Plus, Minus, ArrowRight, TriangleUp, TriangleDown } from '@nutui/icons-vue-taro';
 import { useAccountingStore } from '@/store/accounting';
 import { useNavigationBar } from '@/utils/navigation';
 import { getTabBarInstance } from '@/utils/tab-bar';
@@ -238,18 +238,6 @@ const setCurrentMonth = (date?: Date) => {
   currentDate.value = `${year}-${String(month).padStart(2, '0')}`;
 };
 
-// 月份选择器变化处理
-const onMonthChange = (e: any) => {
-  const date = new Date(e.detail.value);
-  setCurrentMonth(date);
-};
-
-// 导航到添加记录页面
-const navigateToAddRecord = () => {
-  Taro.navigateTo({
-    url: '/pages/accounting/detail/index'
-  });
-};
 
 // 导航到记录详情页面
 const navigateToRecordDetail = (recordId: string) => {

@@ -224,7 +224,7 @@ const getTaskDetail = async (id: string) => {
       }
       formData.id = id;
     }
-  } catch (error) {
+  } catch {
     goBack();
   }
 };
