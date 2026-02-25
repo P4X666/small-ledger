@@ -87,7 +87,7 @@
         <text class="action-text">任务管理</text>
       </view>
       
-      <view class="quick-action" @click="navigateTo('/pages/account/index')">
+      <view class="quick-action" @click="navigateTo('/pages/accounting/index')">
         <view class="quick-action-icon account">
           <text class="icon-text">记账</text>
         </view>

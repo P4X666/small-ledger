@@ -12,7 +12,6 @@ declare module 'vue' {
     NutButton: typeof import('@nutui/nutui-taro')['Button']
     NutCalendar: typeof import('@nutui/nutui-taro')['Calendar']
     NutCell: typeof import('@nutui/nutui-taro')['Cell']
-    NutEllipsis: typeof import('@nutui/nutui-taro')['Ellipsis']
     NutForm: typeof import('@nutui/nutui-taro')['Form']
     NutFormItem: typeof import('@nutui/nutui-taro')['FormItem']
     NutInput: typeof import('@nutui/nutui-taro')['Input']

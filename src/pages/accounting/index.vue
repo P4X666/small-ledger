@@ -106,7 +106,8 @@
           <view class="record-info">
             <view class="record-header">
               <view class="record-product">
-                <nut-ellipsis direction="end" :content="record.product || record.shop"></nut-ellipsis>
+                {{ record.product || record.shop }}
+                <!-- <nut-ellipsis direction="end" :content="record.product || record.shop"></nut-ellipsis> -->
               </view>
               <view :class="['record-amount', record.type]">
                 {{ record.type === 'income' ? '+' : '-' }}¥{{ record.amount }}
@@ -144,7 +145,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
+import Taro, { useDidShow, useLoad, usePullDownRefresh, useReachBottom } from '@tarojs/taro';
 import { Plus, Minus, ArrowRight, TriangleUp, TriangleDown } from '@nutui/icons-vue-taro';
 import { useAccountingStore } from '@/store/accounting';
 import { useNavigationBar } from '@/utils/navigation';
@@ -246,11 +247,6 @@ const navigateToRecordDetail = (recordId: string) => {
   });
 };
 
-// 生命周期钩子
-useLoad(async () => {
-  setCurrentMonth();
-});
-
 const loadData = async (reset = false, getStatistics = false) => {
   const params = {
     startDate: '',
@@ -291,7 +287,13 @@ useReachBottom(()=>{
 })
 
 useLoad(() => {
+  setCurrentMonth();
   loadData(true, true)
+})
+
+usePullDownRefresh(async () => {
+  await loadData(true, true)
+  Taro.stopPullDownRefresh();
 })
 
 const importBillUrl = getBaseUrl() + IMPORT_BILL_URL+'?token='+getToken()

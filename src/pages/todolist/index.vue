@@ -20,11 +20,15 @@
       <!-- 重要/紧急筛选按钮 -->
       <view class="priority-filters">
         <view :class="['filter-btn', { active: filterState.important }]" @tap="toggleFilter('important')">
-          <Star size="16" color="currentColor" />
+          <view style="color: var(--error-color-critical);">
+            <Star size="16" color="currentColor" />
+          </view>
           <text>重要</text>
         </view>
         <view :class="['filter-btn', { active: filterState.urgent }]" @tap="toggleFilter('urgent')">
-          <Clock size="16" color="currentColor" />
+          <view style="color: var(--error-color-critical);">
+            <Clock size="16" color="var(--error-color-critical)" />
+          </view>
           <text>紧急</text>
         </view>
       </view>
@@ -94,7 +98,7 @@
 <script setup lang="ts">
 import { ref, computed, Ref } from 'vue';
 import { useTodoStore, type TimePeriod } from '@/store/todo';
-import Taro, { useDidShow, useLoad, useReachBottom } from '@tarojs/taro';
+import Taro, { useDidShow, useLoad, usePullDownRefresh, useReachBottom } from '@tarojs/taro';
 import { Edit, Del, Star, Clock } from '@nutui/icons-vue-taro';
 import { TaskStatus } from '@/constants/common';
 import { getTabBarInstance } from '@/utils/tab-bar';
@@ -161,6 +165,11 @@ useDidShow(() => {
   tabBar.updateTabbarSelectedIndex(1);
   tabBarHeight.value = tabBar.tabBarHeight;
 }); 
+
+usePullDownRefresh(async () => {
+  await loadTasks(true)
+  Taro.stopPullDownRefresh();
+})
 
 // 切换筛选条件（重要/紧急）
 const toggleFilter = (filterType: 'important' | 'urgent') => {

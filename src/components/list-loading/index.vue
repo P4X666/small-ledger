@@ -4,7 +4,7 @@
             <Loading />加载中...
         </template>
         <template v-else>
-            没有更多数据了~
+            已经到底了~
         </template>
     </view>
 </template>

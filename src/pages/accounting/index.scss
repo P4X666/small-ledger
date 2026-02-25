@@ -264,6 +264,10 @@
       font-size: 28px;
       font-weight: 500;
       color: var(--text-primary);
+      width: 480px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .record-amount {
