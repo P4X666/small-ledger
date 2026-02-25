@@ -1,4 +1,3 @@
 export default {
-  navigationBarTitleText: '攒钱目标',
-  enablePullDownRefresh: true,
+  navigationBarTitleText: '攒钱目标'
 };
