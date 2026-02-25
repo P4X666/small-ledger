@@ -127,6 +127,19 @@ export const useAccountingStore = defineStore('accounting', () => {
       return null;
     }
   };
+
+  // 方法：获取指定ID的记账记录
+  const getTransaction = async (recordId: string) => {
+    if (!recordId) return null;
+    
+    try {
+      const record = await accountingApi.getTransaction(recordId);
+      return record;
+    } catch (error) {
+      console.error('获取记账记录失败:', error);
+      return null;
+    }
+  };
   
   // 方法：更新记账记录
   const updateRecord = async (recordId: string, updatedData: Partial<AccountingRecord>) => {
@@ -309,6 +322,7 @@ export const useAccountingStore = defineStore('accounting', () => {
     loadRecords,
     loadStatistics,
     addRecord,
+    getTransaction,
     updateRecord,
     deleteRecord,
     getMonthlyRecords,

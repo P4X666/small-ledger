@@ -1,6 +1,6 @@
 <template>
   <nut-navbar 
-    :title="isViewMode ? '记录详情' : '添加记录'" 
+    :title="isViewMode ? '账单详情' : '添加记录'" 
     left-show 
     @click-back="goBack" 
     fixed 
@@ -15,7 +15,7 @@
     <view class="section">
         <nut-form ref="formRef" :model-value="formData">
             <nut-form-item label="收支类型" prop="recordType">
-                <nut-radio-group v-model="formData.recordType" direction="horizontal">
+                <nut-radio-group :disabled="isViewMode" v-model="formData.recordType" direction="horizontal">
                     <nut-radio label="income">收入</nut-radio>
                     <nut-radio label="expense">支出</nut-radio>
                 </nut-radio-group>
@@ -49,8 +49,7 @@
             </nut-form-item>
         </nut-form>
     </view>
-    <view class="record-form section">
-      <!-- 操作按钮 -->
+    <!-- <view class="record-form section">
       <view v-if="!isViewMode" class="form-actions">
         <button @tap="goBack" class="cancel-btn">
           <text>取消</text>
@@ -68,7 +67,7 @@
           <text>删除</text>
         </button>
       </view>
-    </view>
+    </view> -->
   </view>
 </template>
 
@@ -144,7 +143,7 @@ const saveRecord = () => {
       type: recordType.value,
       amount: recordAmount.value,
       category: selectedCategory.value,
-      remark: recordRemark.value
+      description: recordRemark.value
     });
     Taro.showToast({
       title: '修改成功',
@@ -156,7 +155,7 @@ const saveRecord = () => {
       type: recordType.value,
       amount: recordAmount.value,
       category: selectedCategory.value,
-      remark: recordRemark.value,
+      description: recordRemark.value,
       date: new Date().toISOString(),
       yearMonth: `${new Date().getFullYear()}年${new Date().getMonth() + 1}月`
     };
@@ -174,12 +173,20 @@ const saveRecord = () => {
   }, 1500);
 };
 
-const loadRecord = () => {
+const loadRecord = async () => {
   if (recordId.value) {
-    const allRecords = accountingStore.records;
-    const foundRecord = allRecords.find(r => r.id === recordId.value);
+    // const allRecords = accountingStore.records;
+    // const foundRecord = allRecords.find(r => r.id === recordId.value);
+    const foundRecord = await accountingStore.getTransaction(recordId.value);
     if (foundRecord) {
       record.value = foundRecord;
+      formData.value = {
+        recordType: foundRecord.type,
+        amount: foundRecord.amount,
+        category: foundRecord.category,
+        remark: foundRecord.description || ''
+      }
+
     } else {
       Taro.showToast({
         title: '记录不存在',
@@ -200,7 +207,7 @@ const switchToEditMode = () => {
     const categories = record.value.type === 'income' ? incomeCategories : expenseCategories;
     categoryIndex.value = categories.findIndex(c => c.value === record.value?.category) || 0;
     
-    recordRemark.value = record.value.remark || '';
+    recordRemark.value = record.value.description || '';
   }
 };
 
